@@ -3,46 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Estacionamento - Fuga do Trânsito</title>
+    <title>Estacionamento - Pensamento Computacional</title>
+    <!-- Tailwind CSS para estilização responsiva -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Fontes do Google para visual amigável -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --cell-size: 16.6666%; /* 100% / 6 */
-            --board-bg: #4b5563; /* gray-600 */
-            --asphalt: #374151; /* gray-700 */
-            --target-car: #ef4444; /* red-500 */
-            --car-color: #fcd34d; /* yellow-300 */
-            --truck-color: #3b82f6; /* blue-500 */
+            --cell-size: 16.666667%;
+            --board-bg: #2d3748;
+            --asphalt: #1a202c;
+            --parking-line: #ecc94b;
         }
 
         body {
             font-family: 'Nunito', sans-serif;
-            background-color: #d1d5db;
-            background-image: radial-gradient(#9ca3af 15%, transparent 15%), radial-gradient(#9ca3af 15%, transparent 15%);
+            background-color: #e2e8f0;
+            background-image: radial-gradient(#cbd5e1 15%, transparent 15%), radial-gradient(#cbd5e1 15%, transparent 15%);
             background-size: 24px 24px;
             background-position: 0 0, 12px 12px;
             touch-action: manipulation;
-            margin: 0;
-            overflow-x: hidden;
-            color: #1f2937;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
-        h1, h2, h3, .font-title {
-            font-family: 'Baloo 2', cursive;
+        .font-title {
+            font-family: 'Fredoka', cursive;
         }
 
+        /* Tabuleiro do Estacionamento */
         #game-board {
             position: relative;
             width: 100%;
-            max-width: 450px;
+            max-width: 440px;
             aspect-ratio: 1 / 1;
             background-color: var(--asphalt);
-            border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            border: 8px solid #1f2937;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+            border: 10px solid #2d3748;
             margin: 0 auto;
-            touch-action: none; /* Previne scroll no mobile ao arrastar */
+            touch-action: none;
+            overflow: visible;
         }
 
         .board-grid {
@@ -52,301 +54,537 @@
             grid-template-columns: repeat(6, 1fr);
             grid-template-rows: repeat(6, 1fr);
             pointer-events: none;
+            border-radius: 8px;
+            overflow: hidden;
         }
 
         .board-cell {
-            border: 1px dashed rgba(255, 255, 255, 0.15);
+            border: 1px dashed rgba(255, 255, 255, 0.12);
+            box-sizing: border-box;
         }
 
-        .exit-marker {
+        /* Marcação da Saída */
+        .exit-gate {
             position: absolute;
-            top: 33.3333%; /* 2 rows down (2 * 16.66%) - Linha 3 (Y=2) */
-            right: -24px;
-            width: 24px;
-            height: 16.6666%;
-            background: repeating-linear-gradient(
-                -45deg,
-                #f59e0b,
-                #f59e0b 8px,
-                #1f2937 8px,
-                #1f2937 16px
-            );
-            border-radius: 0 8px 8px 0;
+            top: 33.333333%; /* Linha 2 (Y=2) */
+            right: -26px;
+            width: 26px;
+            height: 16.666667%;
+            background: linear-gradient(90deg, #e53e3e, #dd6b20);
+            border-radius: 0 10px 10px 0;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            box-shadow: 2px 0 8px rgba(0,0,0,0.4);
-            z-index: 0;
+            color: white;
+            font-weight: 900;
+            font-size: 0.65rem;
+            letter-spacing: 1px;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.3);
+            border: 2px solid #fff;
+            border-left: none;
+            z-index: 5;
+            animation: pulse-exit 1.5s infinite alternate;
         }
 
+        @keyframes pulse-exit {
+            0% { transform: scale(1); filter: brightness(1); }
+            100% { transform: scale(1.05); filter: brightness(1.2); }
+        }
+
+        /* Estilização dos Veículos */
         .vehicle {
             position: absolute;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: grab;
             user-select: none;
-            transition: transform 0.1s ease, filter 0.2s;
-            box-shadow: inset 0 0 0 3px rgba(255,255,255,0.25), 
-                        2px 4px 8px rgba(0,0,0,0.5);
+            transition: box-shadow 0.2s, filter 0.2s;
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.4), inset 0 -3px 4px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.4);
             z-index: 10;
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-
-        .vehicle::after {
-            content: '';
-            width: 50%;
-            height: 30%;
-            background: rgba(0,0,0,0.15);
-            border-radius: 4px;
-        }
-
-        .vehicle.vertical::after {
-            width: 30%;
-            height: 50%;
+            box-sizing: border-box;
         }
 
         .vehicle:active {
             cursor: grabbing;
-            z-index: 20;
-            filter: brightness(1.15);
-            transform: scale(0.97);
-            box-shadow: 1px 2px 5px rgba(0,0,0,0.6);
+            z-index: 30;
+            filter: brightness(1.1);
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.5), inset 0 -3px 4px rgba(0,0,0,0.5), 0 8px 16px rgba(0,0,0,0.5);
         }
 
-        .vehicle[data-type="0"] { background-color: var(--target-car); }
-        .vehicle[data-type="1"] { background-color: var(--car-color); }
-        .vehicle[data-type="2"] { background-color: var(--truck-color); }
+        /* Cores e Detalhes dos Veículos */
+        .vehicle[data-type="0"] { 
+            background: linear-gradient(135deg, #f56565, #e53e3e); 
+            border: 2px solid #9b2c2c;
+        }
+        .vehicle[data-type="1"] { 
+            background: linear-gradient(135deg, #ecc94b, #d69e2e); 
+            border: 2px solid #744210;
+        }
+        .vehicle[data-type="2"] { 
+            background: linear-gradient(135deg, #4299e1, #3182ce); 
+            border: 2px solid #1a365d;
+        }
 
-        /* Ajustes de margem interna para criar o visual de "vaga" */
-        .vehicle.horizontal { height: calc(var(--cell-size) - 6px); margin: 3px 0; }
-        .vehicle.vertical { width: calc(var(--cell-size) - 6px); margin: 0 3px; }
+        /* Visual de Pára-brisa nos carros */
+        .vehicle-glass {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.35);
+            border-radius: 4px;
+            pointer-events: none;
+        }
+        .vehicle.horizontal .vehicle-glass {
+            width: 40%;
+            height: 60%;
+        }
+        .vehicle.vertical .vehicle-glass {
+            width: 60%;
+            height: 40%;
+        }
 
-        .modal {
+        .vehicle-label {
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* Ajustes de Margem interna para caber na vaga */
+        .vehicle.horizontal { height: calc(var(--cell-size) - 8px); margin-top: 4px; margin-bottom: 4px; }
+        .vehicle.vertical { width: calc(var(--cell-size) - 8px); margin-left: 4px; margin-right: 4px; }
+
+        /* Modais */
+        .modal-overlay {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(5px);
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(6px);
             align-items: center;
             justify-content: center;
-            z-index: 50;
+            z-index: 100;
+            padding: 1rem;
         }
+        .modal-overlay.active { display: flex; }
 
-        .modal.active { display: flex; }
-
-        .btn {
-            transition: all 0.1s;
+        /* Efeito no botão do menu de níveis */
+        .level-card {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .btn:active {
-            transform: translateY(3px);
-            box-shadow: none !important;
+        .level-card.unlocked:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
-
-        .screen {
-            display: none;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        .screen.active {
-            display: flex;
-        }
-
-        /* Botões do Menu de Níveis */
-        .level-btn {
-            position: relative;
-            overflow: hidden;
-        }
-        .level-btn.completed {
-            background-color: #10b981; /* emerald-500 */
-            color: white;
-            border-color: #047857; /* emerald-700 */
-        }
-        .moves-badge {
-            font-size: 0.7rem;
-            background: rgba(255,255,255,0.9);
-            color: #047857;
-            padding: 2px 6px;
-            border-radius: 12px;
-            font-weight: bold;
-            margin-top: 4px;
+        .level-card.locked {
+            filter: grayscale(0.6);
+            opacity: 0.75;
+            cursor: not-allowed;
         }
     </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col justify-between text-slate-800">
 
-    <div id="menu-screen" class="screen active p-4 pb-8">
-        <header class="text-center pt-8 pb-6">
-            <h1 class="text-5xl font-title text-gray-800 drop-shadow-md">Estacionamento</h1>
-            <p class="text-gray-600 font-bold mt-2 max-w-md mx-auto">
-                Arraste os veículos para abrir caminho e tire o carro vermelho do estacionamento!
-            </p>
-        </header>
-
-        <main class="flex-grow flex flex-col items-center w-full max-w-3xl mx-auto">
-            <div class="bg-white/80 backdrop-blur p-6 rounded-2xl shadow-xl w-full border border-gray-200">
-                <h2 class="text-2xl font-title text-center mb-4 text-gray-700">Selecione uma Fase</h2>
-                <div id="level-grid" class="grid grid-cols-4 sm:grid-cols-5 gap-3 sm:gap-4">
-                    <!-- Botões gerados via JS -->
+    <!-- CABEÇALHO DO JOGO -->
+    <header class="bg-slate-900 text-white shadow-lg border-b-4 border-amber-500 py-3 px-4">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-amber-500 text-slate-900 p-2 rounded-xl font-title text-2xl font-black">
+                    🅿️
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-title font-bold leading-tight text-amber-400">Estacionamento</h1>
+                    <p class="text-xs text-slate-300 font-semibold">Pensamento Computacional &amp; Lógica</p>
                 </div>
             </div>
-        </main>
-    </div>
-
-    <div id="game-screen" class="screen p-4 pb-8">
-        <div class="max-w-[450px] w-full mx-auto flex-grow flex flex-col pt-4">
             
-            <div class="flex justify-between items-center mb-4">
-                <button id="btn-back" class="btn bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-bold shadow-[0_4px_0_#374151]">
-                    &larr; Menu
+            <div class="flex gap-2">
+                <button id="btn-sound-toggle" class="bg-slate-800 hover:bg-slate-700 text-amber-400 p-2.5 rounded-xl border border-slate-700 transition" title="Alternar Som">
+                    🔊
                 </button>
-                <h2 id="level-title" class="text-2xl font-title text-gray-800 m-0">Fase 1</h2>
-                <button id="btn-restart" class="btn bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-bold shadow-[0_4px_0_#1e3a8a]" title="Reiniciar Fase">
-                    &#x21bb;
-                </button>
-            </div>
-
-            <div class="bg-white/90 rounded-xl p-3 mb-4 shadow-md text-center border border-gray-300">
-                <span class="text-lg font-bold text-gray-700">Movimentos: <span id="moves-counter" class="text-blue-600 text-xl">0</span></span>
-            </div>
-
-            <div id="game-board">
-                <div class="exit-marker"></div>
-                <div class="board-grid" id="grid-bg">
-                    <!-- Células da grade injetadas aqui -->
-                </div>
-                <!-- Veículos injetados aqui -->
             </div>
         </div>
-    </div>
+    </header>
 
-    <div id="win-modal" class="modal">
-        <div class="bg-white p-8 rounded-2xl max-w-sm w-[90%] text-center border-4 border-emerald-500 shadow-2xl relative">
-            <h2 class="text-4xl text-emerald-600 mb-2 font-title">Excelente!</h2>
-            <p id="win-message" class="text-gray-700 font-bold mb-6 text-lg">Fase X Concluída em Y Movimentos!</p>
-            
-            <div class="flex flex-col gap-3">
-                <button id="btn-next-level" class="btn w-full bg-emerald-500 text-white py-3 rounded-xl text-lg font-bold shadow-[0_4px_0_#047857]">
-                    Próxima Fase
+    <!-- TELA 1: SELETOR DE NÍVEIS (MENU PRINCIPAL) -->
+    <main id="screen-menu" class="flex-grow max-w-4xl w-full mx-auto p-4 flex flex-col justify-center">
+        
+        <div class="bg-white/90 backdrop-blur rounded-3xl p-5 sm:p-8 shadow-xl border border-slate-200">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl sm:text-3xl font-title font-bold text-slate-800">Desafios de Estacionamento</h2>
+                <p class="text-slate-600 text-sm sm:text-base mt-1">
+                    Liberte o <span class="text-red-600 font-bold">Carro Vermelho X</span> movendo os outros veículos do caminho!
+                </p>
+                <div class="mt-3 inline-flex items-center gap-2 bg-amber-100 text-amber-900 px-4 py-1.5 rounded-full text-xs font-bold border border-amber-300">
+                    <span>🏆 Progresso:</span>
+                    <span id="progress-text" class="text-amber-700">0 / 20 Concluídos</span>
+                </div>
+            </div>
+
+            <!-- Grade de 20 Níveis -->
+            <div id="levels-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-4">
+                <!-- Cartões dos níveis serão injetados via JavaScript -->
+            </div>
+
+            <!-- Botão de Reiniciar Progresso -->
+            <div class="mt-8 pt-6 border-t border-slate-200 flex justify-center">
+                <button id="btn-open-reset-modal" class="text-xs font-bold text-red-500 hover:text-red-700 hover:bg-red-50 px-4 py-2 rounded-xl transition border border-red-200">
+                    🗑️ Reiniciar Todo o Progresso
                 </button>
-                <button id="btn-modal-menu" class="btn w-full bg-gray-200 text-gray-800 py-3 rounded-xl text-lg font-bold shadow-[0_4px_0_#9ca3af]">
+            </div>
+        </div>
+    </main>
+
+    <!-- TELA 2: TELA DO JOGO (TABULEIRO) -->
+    <main id="screen-game" class="hidden flex-grow max-w-2xl w-full mx-auto p-4 flex-col justify-center items-center">
+        
+        <!-- Barra Superior da Fase -->
+        <div class="w-full max-w-[440px] flex justify-between items-center mb-3">
+            <button id="btn-back-menu" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-4 py-2 rounded-xl text-sm shadow transition border border-slate-700 flex items-center gap-1">
+                ⬅️ Menu
+            </button>
+            
+            <div class="text-center">
+                <h2 id="current-level-title" class="text-xl font-title font-bold text-slate-800">Fase 1</h2>
+                <p class="text-xs font-bold text-slate-500">Mova o Carro X até a SAÍDA</p>
+            </div>
+
+            <button id="btn-restart-level" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold p-2.5 rounded-xl shadow transition text-sm" title="Reiniciar esta fase">
+                🔄
+            </button>
+        </div>
+
+        <!-- Painel de Movimentos -->
+        <div class="w-full max-w-[440px] bg-white rounded-2xl p-3 mb-4 shadow-md flex justify-around items-center border border-slate-200">
+            <div class="text-center">
+                <span class="block text-xs text-slate-400 font-bold uppercase">Movimentos</span>
+                <span id="moves-count" class="text-2xl font-title font-black text-amber-600">0</span>
+            </div>
+            <div class="h-8 w-px bg-slate-200"></div>
+            <div class="text-center">
+                <span class="block text-xs text-slate-400 font-bold uppercase">Melhor Marca</span>
+                <span id="best-moves-count" class="text-2xl font-title font-black text-emerald-600">--</span>
+            </div>
+        </div>
+
+        <!-- O Tabuleiro do Estacionamento -->
+        <div id="game-board">
+            <!-- Portão de Saída na linha Y=2 -->
+            <div class="exit-gate">S<br>A<br>Í<br>D<br>A</div>
+            
+            <!-- Linhas de Vaga no Fundo -->
+            <div class="board-grid" id="board-grid-cells"></div>
+
+            <!-- Veículos renderizados via JS -->
+        </div>
+    </main>
+
+    <!-- MODAL 1: VITÓRIA -->
+    <div id="modal-win" class="modal-overlay">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center shadow-2xl border-4 border-emerald-500 transform transition-all">
+            <div class="text-5xl mb-3 animate-bounce">🎉</div>
+            <h3 class="text-3xl font-title font-bold text-emerald-600">Vaga Liberada!</h3>
+            <p class="text-slate-600 font-semibold mt-2 text-sm sm:text-base">
+                Você retirou o <span class="text-red-600 font-bold">Carro X</span> do estacionamento!
+            </p>
+
+            <div class="bg-slate-50 rounded-2xl p-4 my-5 border border-slate-200">
+                <p class="text-xs text-slate-500 font-bold uppercase">Resultado do Desafio</p>
+                <p id="win-moves-text" class="text-2xl font-title font-bold text-slate-800 my-1">12 Movimentos</p>
+                <p id="win-record-badge" class="text-xs font-bold text-emerald-600 bg-emerald-100 py-1 px-3 rounded-full inline-block mt-1">
+                    🌟 Novo Recorde Pessoal!
+                </p>
+            </div>
+
+            <div class="flex flex-col gap-2.5">
+                <button id="btn-next-level" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-title font-bold py-3 rounded-2xl text-lg shadow-lg transition">
+                    Próximo Nível ➔
+                </button>
+                <button id="btn-win-menu" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-title font-bold py-2.5 rounded-2xl text-md transition">
                     Voltar ao Menu
                 </button>
             </div>
         </div>
     </div>
 
+    <!-- MODAL 2: AVISO DE NÍVEL BLOQUEADO -->
+    <div id="modal-locked" class="modal-overlay">
+        <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl border-4 border-amber-400">
+            <div class="text-4xl mb-2">🔒</div>
+            <h3 class="text-2xl font-title font-bold text-slate-800">Nível Bloqueado</h3>
+            <p id="locked-message" class="text-slate-600 font-semibold my-4 text-sm">
+                Conclua o Nível anterior para desbloquear esta vaga!
+            </p>
+            <button id="btn-close-locked" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-title font-bold py-2.5 rounded-2xl text-md shadow transition">
+                Entendido!
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL 3: CONFIRMAÇÃO DE RESET DE PROGRESSO -->
+    <div id="modal-reset" class="modal-overlay">
+        <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl border-4 border-red-500">
+            <div class="text-4xl mb-2">⚠️</div>
+            <h3 class="text-2xl font-title font-bold text-slate-800">Resetar Progresso?</h3>
+            <p class="text-slate-600 font-semibold my-3 text-sm">
+                Tem certeza de que deseja apagar todo o histórico de níveis e recordes?
+            </p>
+            <div class="flex gap-3 mt-5">
+                <button id="btn-cancel-reset" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 font-title font-bold py-2.5 rounded-2xl text-sm transition">
+                    Cancelar
+                </button>
+                <button id="btn-confirm-reset" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-title font-bold py-2.5 rounded-2xl text-sm shadow transition">
+                    Sim, Resetar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center py-3 text-xs text-slate-500 font-semibold">
+        Estacionamento • Atividade de Raciocínio Lógico &amp; Pensamento Computacional
+    </footer>
+
     <script>
-        // Array rigorosamente de acordo com o pedido: [x, y, comprimento, isVertical, tipo]
-        // Tipo: 0 = Carro Vermelho, 1 = Carro Amarelo, 2 = Caminhão Azul
+        /*
+          Estrutura dos Veículos nos Níveis:
+          [x, y, len, isVertical (1=Sim, 0=Não), tipo (0=Carro X Vermelho, 1=Carro Amarelo, 2=Caminhão Azul)]
+          Grade 6x6. O Carro X sempre fica na linha Y=2 (3ª linha) e tem len=2 e tipo=0.
+          Todas as posições foram rigorosamente checadas contra sobreposições!
+        */
         const levelsData = [
-            // Fases 1 a 10 (Iniciante)
-            [[0,0,2,0,1], [0,1,3,1,2], [1,2,2,0,0], [0,4,2,1,1], [3,1,3,1,2], [2,5,3,0,2], [4,4,2,0,1], [5,0,3,1,2]],
-            [[0,0,2,1,1], [0,2,2,0,0], [0,3,3,0,2], [0,5,2,0,1], [3,0,3,0,2], [3,1,2,1,1], [2,4,2,1,1], [4,2,2,1,1], [5,1,3,1,2], [4,4,2,0,1], [3,5,2,0,1]],
-            [[1,2,2,0,0], [1,3,2,0,1], [1,4,2,1,1], [2,5,2,0,1], [3,2,3,1,2], [5,2,3,1,2]],
-            [[0,0,3,1,2], [1,2,2,0,0], [3,0,3,1,2], [2,3,2,1,1], [2,5,3,0,2], [3,3,3,0,2], [5,4,2,1,1]],
-            [[0,0,2,0,1], [0,1,3,1,2], [0,4,2,1,1], [1,2,2,0,0], [1,3,3,0,2], [3,0,3,1,2], [4,1,3,1,2], [5,0,2,1,1], [5,2,2,1,1], [4,4,2,0,1], [4,5,2,0,1]],
-            [[0,0,2,0,1], [0,1,2,0,1], [0,3,2,0,1], [0,4,2,1,1], [1,2,2,0,0], [3,0,2,1,1], [2,3,2,1,1], [3,2,3,1,2], [3,5,3,0,2], [4,1,3,1,2], [5,1,3,1,2]],
-            [[1,0,2,1,1], [2,0,2,0,1], [4,0,2,1,1], [5,0,2,1,1], [1,2,2,0,0], [3,1,2,1,1], [5,2,2,1,1], [2,3,2,0,1], [3,4,2,1,1]],
-            [[3,0,2,0,1], [5,0,3,1,2], [2,1,2,0,1], [4,1,2,1,1], [0,2,2,0,0], [2,2,2,1,1], [3,2,2,1,1], [0,3,2,0,1], [4,3,2,0,1], [0,4,2,0,1], [2,4,2,1,1], [3,4,3,0,2], [0,5,2,0,1], [3,5,3,0,2]],
-            [[1,0,2,1,1], [2,0,2,0,1], [4,0,2,0,1], [3,1,2,1,1], [4,1,2,0,1], [0,2,2,0,0], [4,2,3,1,2], [5,2,2,1,1], [0,3,3,1,2], [1,3,3,0,2], [2,4,2,1,1], [5,4,2,1,1]],
-            [[0,0,2,0,1], [0,1,2,0,1], [0,2,3,1,2], [0,5,2,0,1], [2,0,2,1,1], [1,2,2,0,0], [1,3,3,0,2], [3,4,2,1,1], [4,0,2,0,1], [4,4,2,0,1], [4,5,2,0,1], [5,1,3,1,2]],
-            // Fases 11 a 20 (Intermediário)
-            [[1,0,2,0,1], [0,0,3,1,2], [3,0,3,1,2], [1,2,2,0,0], [2,3,2,1,1], [3,3,3,0,2], [2,5,3,0,2], [5,4,2,1,1]],
-            [[0,0,2,1,1], [1,0,2,0,1], [5,0,3,1,2], [0,2,2,0,0], [2,1,3,1,2], [3,3,3,0,2], [0,5,3,0,2], [4,4,2,1,1]],
-            [[0,0,2,0,1], [2,0,2,0,1], [4,0,2,1,1], [2,1,2,1,1], [1,1,2,1,1], [3,2,2,0,0], [5,1,3,1,2], [0,2,3,1,2], [2,3,2,0,1], [4,4,2,0,1], [3,4,2,1,1], [1,5,2,0,1], [4,5,2,0,1]],
-            [[0,0,2,0,1], [2,0,2,1,1], [4,1,2,0,1], [0,2,2,1,1], [1,2,2,1,1], [2,2,2,0,0], [4,2,2,1,1], [5,2,2,1,1], [2,3,2,0,1], [0,5,2,0,1], [2,4,2,1,1], [4,4,2,0,1]],
-            [[0,0,2,0,1], [2,0,2,0,1], [0,1,2,0,1], [2,1,2,0,1], [4,0,3,1,2], [5,0,3,1,2], [0,2,3,1,2], [1,2,3,1,2], [2,2,2,0,0], [2,3,2,1,1], [3,3,2,1,1], [4,4,2,0,1], [1,5,2,0,1], [3,5,2,0,1]],
-            [[0,0,2,0,1], [2,0,2,0,1], [4,0,2,1,1], [5,0,3,1,2], [0,2,2,1,1], [2,1,2,0,1], [1,3,2,1,1], [2,2,3,1,2], [3,2,2,0,0], [3,3,3,0,2], [0,5,2,0,1]],
-            [[1,0,3,0,2], [0,0,2,1,1], [2,1,2,0,1], [4,1,2,0,1], [0,2,2,0,0], [2,2,2,1,1], [0,3,2,0,1], [0,4,3,0,2], [0,5,3,0,2], [3,3,3,1,2], [4,4,2,1,1], [5,4,2,1,1]],
-            [[0,0,2,0,1], [2,0,2,1,1], [0,1,2,0,1], [4,0,3,1,2], [0,2,3,1,2], [1,2,2,0,0], [1,3,3,0,2], [1,4,2,0,1], [1,5,3,0,2]],
-            [[2,0,2,1,1], [3,0,2,0,1], [1,2,2,1,1], [2,3,2,0,1], [2,2,2,0,0], [1,4,3,0,2], [4,3,2,1,1], [4,1,2,1,1]],
-            [[0,0,2,1,1], [1,1,2,0,1], [3,0,3,0,2], [3,1,2,1,1], [5,2,3,1,2], [0,2,2,0,0], [2,2,2,1,1], [2,4,2,1,1], [3,4,2,0,1], [3,5,3,0,2]]
+            // Nível 1
+            [[1,2,2,0,0], [0,0,2,0,1], [0,1,3,1,2], [0,4,2,1,1], [3,1,3,1,2], [2,5,3,0,2], [4,3,2,0,1], [5,0,3,1,2]],
+            // Nível 2
+            [[0,2,2,0,0], [0,0,2,1,1], [0,3,3,0,2], [0,5,2,0,1], [3,0,3,0,2], [3,1,2,1,1], [2,4,2,1,1], [4,1,2,1,1], [5,1,3,1,2], [4,4,2,0,1], [3,5,2,0,1]],
+            // Nível 3
+            [[1,2,2,0,0], [1,3,2,0,1], [1,4,2,1,1], [2,5,2,0,1], [3,2,3,1,2], [5,2,3,1,2], [0,0,3,1,2], [2,0,2,0,1], [4,0,2,1,1]],
+            // Nível 4
+            [[1,2,2,0,0], [0,0,3,1,2], [3,0,3,1,2], [2,3,2,1,1], [2,5,3,0,2], [4,3,2,1,1], [5,2,3,1,2], [1,0,2,0,1]],
+            // Nível 5
+            [[1,2,2,0,0], [0,0,2,0,1], [0,1,3,1,2], [0,4,2,1,1], [1,3,2,0,1], [3,0,3,1,2], [4,1,3,1,2], [5,0,2,1,1], [5,2,2,1,1], [4,4,2,0,1], [4,5,2,0,1]],
+            // Nível 6
+            [[1,2,2,0,0], [0,0,2,0,1], [0,1,2,0,1], [0,3,2,0,1], [0,4,2,1,1], [3,0,2,1,1], [2,3,2,1,1], [3,2,3,1,2], [3,5,3,0,2], [4,1,2,1,1], [5,1,3,1,2]],
+            // Nível 7
+            [[1,2,2,0,0], [1,0,2,1,1], [2,0,2,0,1], [4,0,2,1,1], [5,0,2,1,1], [3,1,2,1,1], [5,2,2,1,1], [2,3,2,0,1], [3,4,2,1,1], [0,3,3,1,2]],
+            // Nível 8
+            [[0,2,2,0,0], [3,0,2,0,1], [5,0,3,1,2], [2,1,2,0,1], [4,1,2,1,1], [2,2,2,1,1], [3,2,2,1,1], [0,3,2,0,1], [4,3,2,0,1], [0,4,2,0,1], [2,4,2,1,1], [3,4,3,0,2], [0,5,2,0,1]],
+            // Nível 9
+            [[0,2,2,0,0], [1,0,2,1,1], [2,0,2,0,1], [4,0,2,0,1], [3,1,2,1,1], [4,1,2,0,1], [4,2,3,1,2], [5,2,2,1,1], [0,3,3,1,2], [1,3,3,0,2], [2,4,2,1,1], [5,4,2,1,1]],
+            // Nível 10
+            [[1,2,2,0,0], [0,0,2,0,1], [0,1,2,0,1], [0,2,3,1,2], [0,5,2,0,1], [2,0,2,1,1], [1,3,3,0,2], [3,4,2,1,1], [4,0,2,0,1], [4,4,2,0,1], [4,5,2,0,1], [5,1,3,1,2]],
+            // Nível 11
+            [[1,2,2,0,0], [1,0,2,0,1], [0,0,3,1,2], [3,0,3,1,2], [2,3,2,1,1], [3,3,3,0,2], [2,5,3,0,2], [5,4,2,1,1], [4,0,2,1,1]],
+            // Nível 12
+            [[0,2,2,0,0], [0,0,2,1,1], [1,0,2,0,1], [5,0,3,1,2], [2,1,3,1,2], [3,3,3,0,2], [0,5,3,0,2], [4,4,2,1,1], [3,1,2,1,1]],
+            // Nível 13
+            [[3,2,2,0,0], [0,0,2,0,1], [2,0,2,0,1], [4,0,2,1,1], [2,1,2,1,1], [1,1,2,1,1], [5,1,3,1,2], [0,2,3,1,2], [2,3,2,0,1], [4,4,2,0,1], [3,4,2,1,1], [1,5,2,0,1], [4,5,2,0,1]],
+            // Nível 14
+            [[2,2,2,0,0], [0,0,2,0,1], [2,0,2,1,1], [4,1,2,0,1], [0,2,2,1,1], [1,2,2,1,1], [4,2,2,1,1], [5,2,2,1,1], [2,3,2,0,1], [0,5,2,0,1], [2,4,2,1,1], [4,4,2,0,1]],
+            // Nível 15
+            [[2,2,2,0,0], [0,0,2,0,1], [2,0,2,0,1], [0,1,2,0,1], [2,1,2,0,1], [4,0,3,1,2], [5,0,3,1,2], [0,2,3,1,2], [1,2,3,1,2], [2,3,2,1,1], [3,3,2,1,1], [4,4,2,0,1], [1,5,2,0,1], [3,5,2,0,1]],
+            // Nível 16
+            [[3,2,2,0,0], [0,0,2,0,1], [2,0,2,0,1], [4,0,2,1,1], [5,0,3,1,2], [0,2,2,1,1], [2,1,2,0,1], [1,3,2,1,1], [2,2,3,1,2], [3,3,3,0,2], [0,5,2,0,1]],
+            // Nível 17
+            [[0,2,2,0,0], [1,0,3,0,2], [0,0,2,1,1], [2,1,2,0,1], [4,1,2,0,1], [2,2,2,1,1], [0,3,2,0,1], [0,4,3,0,2], [0,5,3,0,2], [3,3,3,1,2], [4,4,2,1,1], [5,4,2,1,1]],
+            // Nível 18
+            [[1,2,2,0,0], [0,0,2,0,1], [2,0,2,1,1], [0,1,2,0,1], [4,0,3,1,2], [0,2,3,1,2], [1,3,3,0,2], [1,4,2,0,1], [1,5,3,0,2], [5,1,3,1,2]],
+            // Nível 19
+            [[2,2,2,0,0], [2,0,2,1,1], [3,0,2,0,1], [1,2,2,1,1], [2,3,2,0,1], [1,4,3,0,2], [4,3,2,1,1], [4,1,2,1,1], [5,0,3,1,2]],
+            // Nível 20
+            [[0,2,2,0,0], [0,0,2,1,1], [1,1,2,0,1], [3,0,3,0,2], [3,1,2,1,1], [5,2,3,1,2], [2,2,2,1,1], [2,4,2,1,1], [3,4,2,0,1], [3,5,3,0,2]]
         ];
 
         const boardSize = 6;
         let currentLevel = 0;
         let moves = 0;
         let vehicles = [];
-        let history = JSON.parse(localStorage.getItem('estacionamentoHistory')) || {};
-        
-        // Elementos DOM
-        const menuScreen = document.getElementById('menu-screen');
-        const gameScreen = document.getElementById('game-screen');
-        const levelGrid = document.getElementById('level-grid');
-        const boardEl = document.getElementById('game-board');
-        const gridBg = document.getElementById('grid-bg');
-        const movesCounter = document.getElementById('moves-counter');
-        const levelTitle = document.getElementById('level-title');
-        
-        const winModal = document.getElementById('win-modal');
-        const winMessage = document.getElementById('win-message');
-        const btnNextLevel = document.getElementById('btn-next-level');
+        let soundEnabled = true;
 
-        function saveHistory(level, movesMade) {
-            if (!history[level] || movesMade < history[level]) {
-                history[level] = movesMade;
-                localStorage.setItem('estacionamentoHistory', JSON.stringify(history));
+        // Estado do Progresso: { unlocked: maxLevelIndex, bestMoves: { levelIndex: moves } }
+        const STORAGE_KEY = 'estacionamento_progress_data_v1';
+        let progressData = loadProgress();
+
+        function loadProgress() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    return JSON.parse(saved);
+                } catch(e) {}
+            }
+            return { maxUnlocked: 0, bestMoves: {} };
+        }
+
+        function saveProgress() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(progressData));
+        }
+
+        // Sintetizador Web Audio API para Efeitos Sonoros sem arquivos externos
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSound(type) {
+            if (!soundEnabled || !audioCtx) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'move') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.exponentialRampToValueAtTime(260, now + 0.08);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            } else if (type === 'win') {
+                // Arpejo de vitória
+                const notes = [392, 523.25, 659.25, 783.99]; // G4, C5, E5, G5
+                notes.forEach((freq, idx) => {
+                    const noteOsc = audioCtx.createOscillator();
+                    const noteGain = audioCtx.createGain();
+                    noteOsc.connect(noteGain);
+                    noteGain.connect(audioCtx.destination);
+                    noteOsc.type = 'triangle';
+                    noteOsc.frequency.setValueAtTime(freq, now + idx * 0.1);
+                    noteGain.gain.setValueAtTime(0.25, now + idx * 0.1);
+                    noteGain.gain.linearRampToValueAtTime(0.01, now + idx * 0.1 + 0.25);
+                    noteOsc.start(now + idx * 0.1);
+                    noteOsc.stop(now + idx * 0.1 + 0.25);
+                });
+            } else if (type === 'locked') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(140, now);
+                osc.frequency.setValueAtTime(110, now + 0.1);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+                osc.start(now);
+                osc.stop(now + 0.2);
             }
         }
 
+        // DOM elements
+        const screenMenu = document.getElementById('screen-menu');
+        const screenGame = document.getElementById('screen-game');
+        const levelsGrid = document.getElementById('levels-grid');
+        const progressText = document.getElementById('progress-text');
+        
+        const boardEl = document.getElementById('game-board');
+        const boardGridCells = document.getElementById('board-grid-cells');
+        const currentLevelTitle = document.getElementById('current-level-title');
+        const movesCountEl = document.getElementById('moves-count');
+        const bestMovesCountEl = document.getElementById('best-moves-count');
+
+        const modalWin = document.getElementById('modal-win');
+        const modalLocked = document.getElementById('modal-locked');
+        const modalReset = document.getElementById('modal-reset');
+        const lockedMessage = document.getElementById('locked-message');
+
         function renderMenu() {
-            levelGrid.innerHTML = '';
-            levelsData.forEach((_, index) => {
-                const isCompleted = history[index] !== undefined;
-                const btn = document.createElement('button');
-                
-                let baseClasses = 'level-btn flex flex-col items-center justify-center p-3 rounded-xl border-2 font-bold shadow-[0_4px_0_rgba(0,0,0,0.2)] h-20 transition-all active:translate-y-1 active:shadow-none';
+            levelsGrid.innerHTML = '';
+            
+            let completedCount = 0;
+
+            for (let i = 0; i < levelsData.length; i++) {
+                const isUnlocked = i <= progressData.maxUnlocked;
+                const bestMoves = progressData.bestMoves[i];
+                const isCompleted = bestMoves !== undefined;
+
+                if (isCompleted) completedCount++;
+
+                const card = document.createElement('div');
+                card.className = `level-card p-3 rounded-2xl flex flex-col items-center justify-center border-2 font-title transition relative text-center min-h-[90px] ${
+                    isCompleted 
+                        ? 'bg-emerald-50 border-emerald-400 text-emerald-900 unlocked cursor-pointer' 
+                        : isUnlocked 
+                            ? 'bg-white border-amber-400 text-slate-800 unlocked cursor-pointer shadow-sm' 
+                            : 'bg-slate-100 border-slate-300 text-slate-400 locked'
+                }`;
+
+                let badgeHTML = '';
                 if (isCompleted) {
-                    btn.className = `${baseClasses} bg-emerald-500 text-white border-emerald-700`;
-                    btn.innerHTML = `
-                        <span class="text-xl">${index + 1}</span>
-                        <div class="moves-badge">${history[index]} mov.</div>
-                    `;
+                    badgeHTML = `
+                        <div class="text-xs text-emerald-700 font-extrabold mt-1 bg-emerald-100/80 px-2 py-0.5 rounded-full border border-emerald-300">
+                            ✅ ${bestMoves} mov
+                        </div>`;
+                } else if (isUnlocked) {
+                    badgeHTML = `
+                        <div class="text-[10px] text-amber-700 font-extrabold mt-1 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-300">
+                            🔓 Disponível
+                        </div>`;
                 } else {
-                    btn.className = `${baseClasses} bg-white text-gray-700 border-gray-300 hover:bg-gray-50`;
-                    btn.innerHTML = `<span class="text-xl">${index + 1}</span>`;
+                    badgeHTML = `
+                        <div class="text-[11px] text-slate-400 font-extrabold mt-1 flex items-center gap-1">
+                            🔒 Bloqueado
+                        </div>`;
                 }
-                
-                btn.onclick = () => startGame(index);
-                levelGrid.appendChild(btn);
-            });
+
+                card.innerHTML = `
+                    <span class="text-2xl font-black">${i + 1}</span>
+                    ${badgeHTML}
+                `;
+
+                card.onclick = () => {
+                    if (isUnlocked) {
+                        startGame(i);
+                    } else {
+                        playSound('locked');
+                        lockedMessage.innerText = `Você precisa concluir o Nível ${i} primeiro para desbloquear este desafio!`;
+                        modalLocked.classList.add('active');
+                    }
+                };
+
+                levelsGrid.appendChild(card);
+            }
+
+            progressText.innerText = `${completedCount} / 20 Concluídos`;
         }
 
-        function initGrid() {
-            gridBg.innerHTML = '';
+        // Criar as 36 células da grade do tabuleiro
+        function initGridCells() {
+            boardGridCells.innerHTML = '';
             for (let i = 0; i < 36; i++) {
                 const cell = document.createElement('div');
                 cell.className = 'board-cell';
-                gridBg.appendChild(cell);
+                boardGridCells.appendChild(cell);
             }
         }
 
         function startGame(levelIndex) {
             currentLevel = levelIndex;
             moves = 0;
-            movesCounter.innerText = moves;
-            levelTitle.innerText = `Fase ${levelIndex + 1}`;
+            movesCountEl.innerText = moves;
+            currentLevelTitle.innerText = `Nível ${levelIndex + 1}`;
             
-            // Transformar os dados no formato interno [x, y, length, isVertical, type]
-            vehicles = levelsData[levelIndex].map(data => ({
-                x: data[0],
-                y: data[1],
-                length: data[2],
-                isVertical: data[3] === 1,
-                type: data[4]
+            const record = progressData.bestMoves[levelIndex];
+            bestMovesCountEl.innerText = record !== undefined ? record : '--';
+
+            // Carregar cópia dos dados dos veículos
+            vehicles = levelsData[levelIndex].map(item => ({
+                x: item[0],
+                y: item[1],
+                length: item[2],
+                isVertical: item[3] === 1,
+                type: item[4] // 0: Carro X, 1: Carro Amarelo, 2: Caminhão Azul
             }));
 
             renderVehicles();
-            
-            menuScreen.classList.remove('active');
-            gameScreen.classList.add('active');
+
+            screenMenu.classList.add('hidden');
+            screenGame.classList.remove('hidden');
+            screenGame.classList.add('flex');
         }
 
         function renderVehicles() {
-            // Limpar veículos antigos
-            const oldVehicles = document.querySelectorAll('.vehicle');
-            oldVehicles.forEach(el => el.remove());
+            // Limpa veículos do nível anterior
+            const existingVehicles = boardEl.querySelectorAll('.vehicle');
+            existingVehicles.forEach(el => el.remove());
 
             vehicles.forEach((v, index) => {
                 const el = document.createElement('div');
@@ -354,21 +592,37 @@
                 el.dataset.index = index;
                 el.dataset.type = v.type;
 
-                updateVehicleDOM(el, v);
-                setupDragEvents(el, v, index);
+                // Visual de pára-brisa
+                const glass = document.createElement('div');
+                glass.className = 'vehicle-glass';
+                el.appendChild(glass);
+
+                // Rótulo "X" no carro vermelho
+                if (v.type === 0) {
+                    const label = document.createElement('span');
+                    label.className = 'vehicle-label text-lg';
+                    label.innerText = 'X';
+                    el.appendChild(label);
+                }
+
+                updateVehicleDOMPosition(el, v);
+                attachDragListeners(el, index);
                 boardEl.appendChild(el);
             });
         }
 
-        function updateVehicleDOM(el, v) {
+        function updateVehicleDOMPosition(el, v) {
+            const step = 100 / boardSize;
             if (v.isVertical) {
-                el.style.height = `calc(${v.length * (100 / boardSize)}% - 6px)`;
-                el.style.left = `${v.x * (100 / boardSize)}%`;
-                el.style.top = `${v.y * (100 / boardSize)}%`;
+                el.style.height = `calc(${v.length * step}% - 8px)`;
+                el.style.width = `calc(${step}% - 8px)`;
+                el.style.left = `${v.x * step}%`;
+                el.style.top = `${v.y * step}%`;
             } else {
-                el.style.width = `calc(${v.length * (100 / boardSize)}% - 6px)`;
-                el.style.left = `${v.x * (100 / boardSize)}%`;
-                el.style.top = `${v.y * (100 / boardSize)}%`;
+                el.style.width = `calc(${v.length * step}% - 8px)`;
+                el.style.height = `calc(${step}% - 8px)`;
+                el.style.left = `${v.x * step}%`;
+                el.style.top = `${v.y * step}%`;
             }
         }
 
@@ -378,61 +632,71 @@
         let startGridX = 0, startGridY = 0;
         let minBound = 0, maxBound = 0;
 
-        function setupDragEvents(el, v, index) {
+        function attachDragListeners(el, index) {
             el.addEventListener('pointerdown', (e) => {
-                e.preventDefault(); // Previne scroll
-                
+                e.preventDefault();
                 activeEl = el;
                 activeIndex = index;
-                
+
                 startClientX = e.clientX;
                 startClientY = e.clientY;
+
+                const v = vehicles[index];
                 startGridX = v.x;
                 startGridY = v.y;
-                
-                calculateBounds(activeIndex);
-                
+
+                calculateMovementBounds(index);
+
                 window.addEventListener('pointermove', onPointerMove);
                 window.addEventListener('pointerup', onPointerUp);
+                window.addEventListener('pointercancel', onPointerUp);
             });
         }
 
-        function calculateBounds(index) {
-            const v = vehicles[index];
+        // Calcula exatamente até onde o veículo pode deslizar sem bater em outros
+        function calculateMovementBounds(index) {
+            const targetV = vehicles[index];
             const grid = Array(6).fill(null).map(() => Array(6).fill(false));
-            
-            // Popula a matriz com todos OS OUTROS veículos
-            vehicles.forEach((other, idx) => {
+
+            // Preenche matriz de ocupação com todos os OUTROS veículos
+            vehicles.forEach((v, idx) => {
                 if (idx === index) return;
-                for (let i = 0; i < other.length; i++) {
-                    if (other.isVertical) grid[other.y + i][other.x] = true;
-                    else grid[other.y][other.x + i] = true;
+                for (let i = 0; i < v.length; i++) {
+                    if (v.isVertical) {
+                        grid[v.y + i][v.x] = true;
+                    } else {
+                        grid[v.y][v.x + i] = true;
+                    }
                 }
             });
 
-            if (v.isVertical) {
-                minBound = v.y; maxBound = v.y;
-                // Olha pra cima
-                for (let y = v.y - 1; y >= 0; y--) {
-                    if (grid[y][v.x]) break;
+            if (targetV.isVertical) {
+                minBound = targetV.y;
+                maxBound = targetV.y;
+
+                // Limite Cima
+                for (let y = targetV.y - 1; y >= 0; y--) {
+                    if (grid[y][targetV.x]) break;
                     minBound = y;
                 }
-                // Olha pra baixo
-                for (let y = v.y + v.length; y < boardSize; y++) {
-                    if (grid[y][v.x]) break;
-                    maxBound = y - v.length + 1;
+                // Limite Baixo
+                for (let y = targetV.y + targetV.length; y < boardSize; y++) {
+                    if (grid[y][targetV.x]) break;
+                    maxBound = y - targetV.length + 1;
                 }
             } else {
-                minBound = v.x; maxBound = v.x;
-                // Olha pra esquerda
-                for (let x = v.x - 1; x >= 0; x--) {
-                    if (grid[v.y][x]) break;
+                minBound = targetV.x;
+                maxBound = targetV.x;
+
+                // Limite Esquerda
+                for (let x = targetV.x - 1; x >= 0; x--) {
+                    if (grid[targetV.y][x]) break;
                     minBound = x;
                 }
-                // Olha pra direita
-                for (let x = v.x + v.length; x < boardSize; x++) {
-                    if (grid[v.y][x]) break;
-                    maxBound = x - v.length + 1;
+                // Limite Direita
+                for (let x = targetV.x + targetV.length; x < boardSize; x++) {
+                    if (grid[targetV.y][x]) break;
+                    maxBound = x - targetV.length + 1;
                 }
             }
         }
@@ -442,22 +706,23 @@
             e.preventDefault();
 
             const v = vehicles[activeIndex];
-            const cellSizePx = boardEl.getBoundingClientRect().width / boardSize;
+            const boardRect = boardEl.getBoundingClientRect();
+            const cellSizePx = boardRect.width / boardSize;
 
             if (v.isVertical) {
                 const deltaY = e.clientY - startClientY;
-                const cellsMoved = Math.round(deltaY / cellSizePx);
-                let newY = startGridY + cellsMoved;
-                
+                const offsetCells = Math.round(deltaY / cellSizePx);
+                let newY = startGridY + offsetCells;
                 newY = Math.max(minBound, Math.min(newY, maxBound));
+
                 v.y = newY;
                 activeEl.style.top = `${newY * (100 / boardSize)}%`;
             } else {
                 const deltaX = e.clientX - startClientX;
-                const cellsMoved = Math.round(deltaX / cellSizePx);
-                let newX = startGridX + cellsMoved;
-                
+                const offsetCells = Math.round(deltaX / cellSizePx);
+                let newX = startGridX + offsetCells;
                 newX = Math.max(minBound, Math.min(newX, maxBound));
+
                 v.x = newX;
                 activeEl.style.left = `${newX * (100 / boardSize)}%`;
             }
@@ -467,11 +732,12 @@
             if (!activeEl) return;
 
             const v = vehicles[activeIndex];
-            
-            // Regra: Conta movimento apenas se soltar em posição diferente
+
+            // Contabiliza movimento apenas se mudou de célula na grade
             if (v.x !== startGridX || v.y !== startGridY) {
                 moves++;
-                movesCounter.innerText = moves;
+                movesCountEl.innerText = moves;
+                playSound('move');
             }
 
             activeEl = null;
@@ -479,63 +745,118 @@
 
             window.removeEventListener('pointermove', onPointerMove);
             window.removeEventListener('pointerup', onPointerUp);
+            window.removeEventListener('pointercancel', onPointerUp);
 
-            checkWin();
+            checkWinCondition();
         }
 
-        function checkWin() {
-            // O carro alvo sempre é o tipo 0 (Vermelho)
+        function checkWinCondition() {
             const targetCar = vehicles.find(v => v.type === 0);
-            
-            // Condição de vitória: carro vermelho encostou na borda direita
-            // Estando na linha Y=2 (índice 2), a saída é x=4 (para len=2) ocupando 4 e 5.
+
+            // Vitória acontece quando o Carro X (comprimento 2) chega na coluna 4 (ocupando colunas 4 e 5) da linha Y=2
             if (targetCar && targetCar.x + targetCar.length >= boardSize) {
-                saveHistory(currentLevel, moves);
-                
-                winMessage.innerText = `Fase ${currentLevel + 1} concluída em ${moves} movimentos!`;
-                
-                // Exibir botão "Próxima Fase" se não for a última
+                playSound('win');
+
+                // Atualizar histórico e desbloqueio
+                const currentRecord = progressData.bestMoves[currentLevel];
+                let isNewRecord = false;
+
+                if (currentRecord === undefined || moves < currentRecord) {
+                    progressData.bestMoves[currentLevel] = moves;
+                    isNewRecord = true;
+                }
+
+                // Desbloquear próximo nível se houver
+                if (currentLevel + 1 > progressData.maxUnlocked && currentLevel + 1 < levelsData.length) {
+                    progressData.maxUnlocked = currentLevel + 1;
+                }
+
+                saveProgress();
+
+                // Exibir modal de vitória
+                document.getElementById('win-moves-text').innerText = `${moves} Movimentos`;
+                const recordBadge = document.getElementById('win-record-badge');
+                if (isNewRecord) {
+                    recordBadge.innerText = '🌟 Novo Recorde Pessoal!';
+                    recordBadge.className = 'text-xs font-bold text-emerald-700 bg-emerald-100 py-1 px-3 rounded-full inline-block mt-1';
+                } else {
+                    recordBadge.innerText = `Melhor anterior: ${currentRecord} mov`;
+                    recordBadge.className = 'text-xs font-bold text-slate-600 bg-slate-200 py-1 px-3 rounded-full inline-block mt-1';
+                }
+
+                const btnNextLevel = document.getElementById('btn-next-level');
                 if (currentLevel < levelsData.length - 1) {
                     btnNextLevel.style.display = 'block';
+                    btnNextLevel.innerText = `Próximo Nível (${currentLevel + 2}) ➔`;
                 } else {
                     btnNextLevel.style.display = 'none';
                 }
-                
+
                 setTimeout(() => {
-                    winModal.classList.add('active');
-                }, 150);
+                    modalWin.classList.add('active');
+                }, 200);
             }
         }
 
-        document.getElementById('btn-back').addEventListener('click', () => {
-            gameScreen.classList.remove('active');
-            menuScreen.classList.add('active');
-            renderMenu();
-        });
+        // Botão do Som
+        document.getElementById('btn-sound-toggle').onclick = () => {
+            soundEnabled = !soundEnabled;
+            document.getElementById('btn-sound-toggle').innerText = soundEnabled ? '🔊' : '🔇';
+        };
 
-        document.getElementById('btn-restart').addEventListener('click', () => {
+        // Navegação do Jogo
+        document.getElementById('btn-back-menu').onclick = () => {
+            screenGame.classList.remove('flex');
+            screenGame.classList.add('hidden');
+            screenMenu.classList.remove('hidden');
+            renderMenu();
+        };
+
+        document.getElementById('btn-restart-level').onclick = () => {
             startGame(currentLevel);
-        });
+        };
 
-        document.getElementById('btn-modal-menu').addEventListener('click', () => {
-            winModal.classList.remove('active');
-            gameScreen.classList.remove('active');
-            menuScreen.classList.add('active');
-            renderMenu();
-        });
-
-        btnNextLevel.addEventListener('click', () => {
-            winModal.classList.remove('active');
+        // Botoes dos Modais
+        document.getElementById('btn-next-level').onclick = () => {
+            modalWin.classList.remove('active');
             if (currentLevel < levelsData.length - 1) {
                 startGame(currentLevel + 1);
             }
-        });
+        };
 
-        // Previne comportamentos drag nativos indesejados no navegador
+        document.getElementById('btn-win-menu').onclick = () => {
+            modalWin.classList.remove('active');
+            screenGame.classList.remove('flex');
+            screenGame.classList.add('hidden');
+            screenMenu.classList.remove('hidden');
+            renderMenu();
+        };
+
+        document.getElementById('btn-close-locked').onclick = () => {
+            modalLocked.classList.remove('active');
+        };
+
+        // Resetar Progresso
+        document.getElementById('btn-open-reset-modal').onclick = () => {
+            modalReset.classList.add('active');
+        };
+
+        document.getElementById('btn-cancel-reset').onclick = () => {
+            modalReset.classList.remove('active');
+        };
+
+        document.getElementById('btn-confirm-reset').onclick = () => {
+            progressData = { maxUnlocked: 0, bestMoves: {} };
+            saveProgress();
+            modalReset.classList.remove('active');
+            renderMenu();
+        };
+
+        // Previne comportamentos indesejados ao arrastar
         document.addEventListener('dragstart', (e) => e.preventDefault());
 
-        /* INITIAL START */
-        initGrid();
+        /* INICIALIZAÇÃO */
+        initGridCells();
         renderMenu();
 
     </script>
