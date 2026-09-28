@@ -1755,7 +1755,18 @@
             if (!fase) return false;
 
             try {
-                loadCustomLevelFromUrl(fase);
+                // Mesma sequência do outro arquivo:
+                // 1) pega a string da URL;
+                // 2) decodifica Base64 para recuperar o JSON;
+                // 3) transforma em array de veículos;
+                // 4) valida e carrega a fase.
+                const decoded = decodeSharedLevel(fase);
+
+                if (!Array.isArray(decoded) || decoded.length === 0) {
+                    throw new Error('A fase compartilhada não contém veículos.');
+                }
+
+                loadCustomLevelFromUrl(decoded);
                 return true;
             } catch (e) {
                 console.error('Erro ao carregar fase compartilhada:', e);
