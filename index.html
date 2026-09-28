@@ -1639,17 +1639,45 @@
             renderVehicles();
         }
 
-        function generateShareLink() {
-            if (!customLevelSolution || !customLevelData) {
-                customLevelData = cloneCustomState(editorVehicles);
-            }
-
-            const json = JSON.stringify(customLevelData);
+        // ================================================================
+        // COMPARTILHAMENTO DE FASES
+        //
+        // O link usa Base64URL (sem +, / ou =) para evitar problemas de
+        // interpretação do parâmetro ?fase= por navegadores/servidores.
+        // ================================================================
+        function encodeSharedLevel(level) {
+            const json = JSON.stringify(level);
             const bytes = new TextEncoder().encode(json);
             let binary = '';
-            bytes.forEach(b => binary += String.fromCharCode(b));
+            const chunkSize = 0x8000;
 
-            const encoded = encodeURIComponent(btoa(binary));
+            for (let i = 0; i < bytes.length; i += chunkSize) {
+                binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+            }
+
+            return btoa(binary)
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=+$/g, '');
+        }
+
+        function generateShareLink() {
+            // Sempre usa o estado atual do editor.
+            // Isso evita compartilhar uma cópia antiga da fase.
+            const level = cloneCustomState(editorVehicles);
+            const solution = solvePuzzleBFS(level);
+
+            if (!solution.solvable) {
+                alert('Não é possível compartilhar esta fase:\n\n' + solution.error);
+                return;
+            }
+
+            customLevelData = level;
+            customLevelSolution = solution;
+
+            const encoded = encodeSharedLevel(level);
+
+            // IMPORTANTE: o link deve apontar para a raiz oficial do jogo.
             const root = 'https://diegodio2712.github.io/jogoestacionamento/';
             const shareUrl = `${root}?fase=${encoded}`;
 
@@ -1657,41 +1685,70 @@
             modalShareCustom.classList.add('active');
         }
 
-        function copyShareUrl() {
+        async function copyShareUrl() {
             const input = document.getElementById('share-url-input');
-            navigator.clipboard?.writeText(input.value).then(() => {
-                document.getElementById('share-copy-feedback').classList.remove('hidden');
-                setTimeout(() => document.getElementById('share-copy-feedback').classList.add('hidden'), 2500);
-            }).catch(() => {
+            const url = input.value;
+            const feedback = document.getElementById('share-copy-feedback');
+
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(url);
+                } else {
+                    input.focus();
+                    input.select();
+                    input.setSelectionRange(0, input.value.length);
+                    const ok = document.execCommand('copy');
+                    if (!ok) throw new Error('Falha ao copiar');
+                }
+
+                feedback.textContent = '✓ Link copiado!';
+                feedback.classList.remove('hidden');
+                setTimeout(() => feedback.classList.add('hidden'), 2500);
+            } catch (e) {
+                feedback.textContent = 'Selecione e copie o link manualmente.';
+                feedback.classList.remove('hidden');
+                input.focus();
                 input.select();
-                document.execCommand('copy');
-                document.getElementById('share-copy-feedback').classList.remove('hidden');
-            });
+            }
         }
 
         function decodeSharedLevel(encoded) {
             if (!encoded) throw new Error('Parâmetro "fase" vazio.');
 
             const candidates = [encoded];
+
+            // Compatibilidade com links eventualmente codificados duas vezes.
             try {
-                const once = decodeURIComponent(encoded);
-                if (once !== encoded) candidates.push(once);
+                const decoded = decodeURIComponent(encoded);
+                if (decoded !== encoded) candidates.push(decoded);
             } catch (_) {}
 
             for (const candidate of candidates) {
                 try {
-                    let base64 = candidate.replace(/-/g, '+').replace(/_/g, '/');
-                    while (base64.length % 4) base64 += '=';
+                    // ========================================================
+                    // FORMATO NOVO: Base64URL
+                    // ========================================================
+                    let base64 = candidate
+                        .replace(/-/g, '+')
+                        .replace(/_/g, '/');
+
+                    while (base64.length % 4 !== 0) base64 += '=';
 
                     const binary = atob(base64);
-                    const bytes = Uint8Array.from(binary, ch => ch.charCodeAt(0));
+                    const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
                     const text = new TextDecoder('utf-8').decode(bytes);
                     const parsed = JSON.parse(text);
 
                     if (Array.isArray(parsed)) return parsed;
-                } catch (_) {
-                    // tenta o próximo formato
-                }
+                } catch (_) {}
+
+                try {
+                    // ========================================================
+                    // COMPATIBILIDADE: links antigos em Base64 normal
+                    // ========================================================
+                    const parsed = JSON.parse(atob(candidate));
+                    if (Array.isArray(parsed)) return parsed;
+                } catch (_) {}
             }
 
             throw new Error('Não foi possível decodificar a fase compartilhada.');
