@@ -184,6 +184,71 @@
             opacity: 0.75;
             cursor: not-allowed;
         }
+
+
+        /* ============================================================
+           EDITOR DE FASES PERSONALIZADAS
+           ============================================================ */
+        .editor-board {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background-color: var(--asphalt);
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,.3);
+            border: 10px solid #2d3748;
+            overflow: visible;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+        }
+        .editor-cell {
+            border: 1px dashed rgba(255,255,255,.12);
+            cursor: pointer;
+            transition: background .15s;
+        }
+        .editor-cell:hover { background: rgba(255,255,255,.06); }
+        .editor-vehicle {
+            position: absolute;
+            z-index: 10;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+            box-sizing: border-box;
+            cursor: pointer;
+            box-shadow: inset 0 2px 4px rgba(255,255,255,.35), inset 0 -3px 4px rgba(0,0,0,.35), 0 4px 8px rgba(0,0,0,.35);
+        }
+        .editor-vehicle.x { background: linear-gradient(135deg,#f56565,#e53e3e); color:white; border:2px solid #9b2c2c; }
+        .editor-vehicle.car { background: linear-gradient(135deg,#ecc94b,#d69e2e); color:white; border:2px solid #744210; }
+        .editor-vehicle.truck { background: linear-gradient(135deg,#4299e1,#3182ce); color:white; border:2px solid #1a365d; }
+        .editor-exit-gate {
+            position:absolute; top:33.333%; right:-26px; width:26px; height:16.666%;
+            background:linear-gradient(90deg,#e53e3e,#dd6b20); border-radius:0 10px 10px 0;
+            color:white; font-weight:900; font-size:.55rem; letter-spacing:1px;
+            display:flex; align-items:center; justify-content:center; writing-mode:vertical-rl;
+            z-index:20; border:2px solid white; border-left:none;
+        }
+        .editor-dir {
+            padding:.6rem; border-radius:.75rem; font-size:.75rem; font-weight:800;
+            background:#fff; color:#64748b; border:1px solid #cbd5e1; transition:.15s;
+        }
+        .editor-dir.active { background:#0ea5e9; color:#fff; border-color:#0284c7; box-shadow:0 0 0 2px #bae6fd; }
+        .editor-palette-item {
+            width:100%; padding:.65rem; border-radius:.75rem; font-weight:900;
+            background:#fff; border:2px solid #cbd5e1; color:#334155; cursor:pointer;
+        }
+        .editor-palette-item.selected { background:#fee2e2; border-color:#ef4444; color:#b91c1c; box-shadow:0 0 0 2px #fecaca; }
+        .editor-small-item {
+            padding:.45rem; border-radius:.6rem; font-size:.75rem; font-weight:900;
+            background:#fff; border:1px solid #cbd5e1; color:#a16207; cursor:pointer;
+        }
+        .editor-small-item.selected { background:#facc15; color:#422006; border-color:#a16207; box-shadow:0 0 0 2px #fde68a; }
+        .editor-small-item.truck { color:#0369a1; }
+        .editor-small-item.truck.selected { background:#38bdf8; color:#082f49; border-color:#0369a1; }
+
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between text-slate-800">
@@ -202,6 +267,9 @@
             </div>
             
             <div class="flex gap-2">
+                <button id="btn-open-editor" class="bg-slate-800 hover:bg-slate-700 text-sky-300 p-2.5 rounded-xl border border-slate-700 transition" title="Criar fase">
+                    🛠️
+                </button>
                 <button id="btn-sound-toggle" class="bg-slate-800 hover:bg-slate-700 text-amber-400 p-2.5 rounded-xl border border-slate-700 transition" title="Alternar Som">
                     🔊
                 </button>
@@ -256,7 +324,82 @@
         </div>
     </main>
 
-    <!-- TELA 2: TELA DO JOGO (TABULEIRO) -->
+    <div id="custom-level-banner" class="hidden mx-auto w-full max-w-5xl px-4 pt-3">
+        <div class="bg-sky-100 border border-sky-300 text-sky-900 rounded-2xl px-4 py-3 text-sm font-bold flex items-center justify-between gap-3">
+            <span>🔗 Você abriu uma <strong>fase personalizada compartilhada</strong>.</span>
+            <button id="btn-dismiss-banner" class="bg-sky-600 hover:bg-sky-700 text-white px-3 py-1.5 rounded-lg text-xs">Entendido</button>
+        </div>
+    </div>
+
+    <!-- TELA 2: EDITOR DE FASES PERSONALIZADAS -->
+    <main id="screen-editor" class="hidden flex-grow max-w-5xl w-full mx-auto p-4">
+        <div class="bg-white/95 backdrop-blur rounded-3xl p-5 sm:p-7 shadow-xl border border-slate-200">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-title font-bold text-slate-800">🛠️ Criar Estacionamento</h2>
+                    <p class="text-sm text-slate-500 mt-1">Monte sua própria fase, verifique se ela é resolvível e compartilhe por link.</p>
+                </div>
+                <button id="btn-editor-back" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-4 py-2 rounded-xl text-sm shadow transition">
+                    ⬅️ Voltar
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                    <div class="relative w-full max-w-[440px] mx-auto">
+                        <div id="editor-board" class="editor-board">
+                            <div class="editor-exit-gate">SAÍDA</div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-500 text-center mt-3">
+                        Selecione um veículo e toque em uma célula para posicioná-lo. Toque em um veículo para removê-lo.
+                    </p>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+                        <h3 class="text-xs font-black uppercase tracking-wider text-slate-500 mb-3">1. Veículo e orientação</h3>
+                        <div class="grid grid-cols-2 gap-2 mb-3">
+                            <button id="editor-dir-h" class="editor-dir active">↔️ Horizontal</button>
+                            <button id="editor-dir-v" class="editor-dir">↕️ Vertical</button>
+                        </div>
+
+                        <div class="editor-palette">
+                            <button id="palette-X" class="editor-palette-item selected">🚗 X</button>
+                        </div>
+                        <div class="text-[11px] font-bold text-slate-400 mt-3 mb-1">Carros amarelos (tamanho 2)</div>
+                        <div id="palette-cars-grid" class="grid grid-cols-6 gap-1.5"></div>
+                        <div class="text-[11px] font-bold text-slate-400 mt-3 mb-1">Caminhões azuis (tamanho 3)</div>
+                        <div id="palette-trucks-grid" class="grid grid-cols-4 gap-1.5"></div>
+                    </div>
+
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+                        <h3 class="text-xs font-black uppercase tracking-wider text-slate-500 mb-3">2. Validação</h3>
+                        <div id="editor-status-box" class="rounded-xl border border-slate-200 bg-white p-3 mb-3">
+                            <div id="editor-status-title" class="font-bold text-amber-600">⚠️ Adicione o Carro X</div>
+                            <div id="editor-status-desc" class="text-xs text-slate-500 mt-1">
+                                O Carro X deve ser horizontal e ficar na linha da saída.
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <button id="btn-test-custom" disabled class="bg-amber-500 hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed text-slate-900 font-black py-3 rounded-xl text-sm shadow transition">
+                                ▶️ Testar fase
+                            </button>
+                            <button id="btn-share-custom" disabled class="bg-sky-600 hover:bg-sky-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl text-sm shadow transition">
+                                🔗 Compartilhar
+                            </button>
+                        </div>
+                        <button id="btn-clear-editor" class="w-full mt-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold py-2.5 rounded-xl text-xs transition">
+                            🗑️ Limpar editor
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- TELA 3: TELA DO JOGO (TABULEIRO) -->
+
     <main id="screen-game" class="hidden flex-grow max-w-2xl w-full mx-auto p-4 flex-col justify-center items-center">
         
         <!-- Barra Superior da Fase -->
@@ -408,6 +551,28 @@
         </div>
     </div>
 
+    <!-- MODAL: LINK DE FASE PERSONALIZADA -->
+    <div id="modal-share-custom" class="modal-overlay">
+        <div class="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border-4 border-sky-500">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-xl font-title font-bold text-slate-800">🔗 Compartilhar Fase</h3>
+                <button id="btn-close-share-custom" class="text-slate-400 hover:text-slate-700 font-bold text-lg">✕</button>
+            </div>
+            <p class="text-slate-600 text-sm mb-3">
+                Qualquer pessoa que abrir este link carregará a fase automaticamente.
+            </p>
+            <div class="flex gap-2">
+                <input id="share-url-input" readonly class="min-w-0 flex-1 font-mono text-xs p-3 border-2 border-slate-300 rounded-xl bg-slate-50 focus:outline-none">
+                <button id="btn-copy-share-url" class="bg-sky-600 hover:bg-sky-700 text-white font-bold px-4 rounded-xl text-sm">
+                    📋 Copiar
+                </button>
+            </div>
+            <div id="share-copy-feedback" class="hidden mt-3 text-center text-xs font-bold text-emerald-700 bg-emerald-100 border border-emerald-300 rounded-xl p-2">
+                ✅ Link copiado!
+            </div>
+        </div>
+    </div>
+
     <footer class="text-center py-3 text-xs text-slate-500 font-semibold">
         Estacionamento • Atividade de Raciocínio Lógico &amp; Pensamento Computacional
     </footer>
@@ -465,6 +630,14 @@
         let moves = 0;
         let vehicles = [];
         let soundEnabled = true;
+
+        // Estado das fases personalizadas
+        let editorVehicles = [];
+        let editorDir = 'h';
+        let editorSelectedType = 'X';
+        let customLevelSolution = null;
+        let isCustomLevelMode = false;
+        let customLevelData = null;
 
         // Estado do Progresso
         const STORAGE_KEY = 'estacionamento_progress_data_v1';
@@ -811,6 +984,9 @@
         const modalLocked = document.getElementById('modal-locked');
         const modalReset = document.getElementById('modal-reset');
         const modalLoadCode = document.getElementById('modal-load-code');
+        const screenEditor = document.getElementById('screen-editor');
+        const editorBoard = document.getElementById('editor-board');
+        const modalShareCustom = document.getElementById('modal-share-custom');
         const lockedMessage = document.getElementById('locked-message');
 
         function renderMenu() {
@@ -888,6 +1064,10 @@
         }
 
         function startGame(levelIndex) {
+            isCustomLevelMode = false;
+            customLevelData = null;
+            customLevelSolution = null;
+            document.getElementById('custom-level-banner').classList.add('hidden');
             currentLevel = levelIndex;
             moves = 0;
             movesCountEl.innerText = moves;
@@ -1074,6 +1254,18 @@
             const targetCar = vehicles.find(v => v.type === 0);
 
             if (targetCar && targetCar.x + targetCar.length >= boardSize) {
+                if (isCustomLevelMode) {
+                    playSound('win');
+                    document.getElementById('win-moves-text').innerText = `${moves} Movimentos`;
+                    document.getElementById('win-record-badge').innerText =
+                        `🧮 Mínimo matemático: ${customLevelSolution ? customLevelSolution.moves : '--'} movimentos`;
+                    document.getElementById('win-record-badge').className =
+                        'text-xs font-bold text-sky-700 bg-sky-100 py-1 px-3 rounded-full inline-block mt-1';
+                    document.getElementById('win-save-code-display').innerText = 'FASE PERSONALIZADA';
+                    document.getElementById('btn-next-level').style.display = 'none';
+                    setTimeout(() => modalWin.classList.add('active'), 200);
+                    return;
+                }
                 playSound('win');
 
                 const currentRecord = progressData.bestMoves[currentLevel];
@@ -1119,6 +1311,460 @@
             }
         }
 
+
+        /* ================================================================
+           FASES PERSONALIZADAS: EDITOR + BFS + COMPARTILHAMENTO
+           ================================================================ */
+
+        function switchToEditor() {
+            screenMenu.classList.add('hidden');
+            screenGame.classList.add('hidden');
+            screenGame.classList.remove('flex');
+            screenEditor.classList.remove('hidden');
+            editorVehicles = [];
+            editorSelectedType = 'X';
+            editorDir = 'h';
+            renderEditorPalette();
+            renderEditorBoard();
+            validateEditorLevel();
+        }
+
+        function closeEditor() {
+            screenEditor.classList.add('hidden');
+            screenMenu.classList.remove('hidden');
+            renderMenu();
+        }
+
+        function renderEditorPalette() {
+            const cars = document.getElementById('palette-cars-grid');
+            const trucks = document.getElementById('palette-trucks-grid');
+            cars.innerHTML = '';
+            trucks.innerHTML = '';
+
+            const carLetters = ['A','B','C','D','E','F','G','H','I','J','K'];
+            carLetters.forEach(id => {
+                const b = document.createElement('button');
+                b.className = `editor-small-item ${editorSelectedType === id ? 'selected' : ''}`;
+                b.textContent = id;
+                b.onclick = () => {
+                    editorSelectedType = id;
+                    renderEditorPalette();
+                };
+                cars.appendChild(b);
+            });
+
+            ['1','2','3','4'].forEach(id => {
+                const b = document.createElement('button');
+                b.className = `editor-small-item truck ${editorSelectedType === id ? 'selected' : ''}`;
+                b.textContent = `C${id}`;
+                b.onclick = () => {
+                    editorSelectedType = id;
+                    renderEditorPalette();
+                };
+                trucks.appendChild(b);
+            });
+
+            const x = document.getElementById('palette-X');
+            x.className = `editor-palette-item ${editorSelectedType === 'X' ? 'selected' : ''}`;
+
+            document.getElementById('editor-dir-h').classList.toggle('active', editorDir === 'h');
+            document.getElementById('editor-dir-v').classList.toggle('active', editorDir === 'v');
+        }
+
+        function setEditorDir(dir) {
+            editorDir = dir;
+            renderEditorPalette();
+        }
+
+        function createEditorGrid() {
+            editorBoard.querySelectorAll('.editor-cell').forEach(e => e.remove());
+            for (let r = 0; r < 6; r++) {
+                for (let c = 0; c < 6; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'editor-cell';
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+                    cell.style.gridRow = r + 1;
+                    cell.style.gridColumn = c + 1;
+                    cell.onclick = () => placeVehicleInEditor(r, c);
+                    editorBoard.appendChild(cell);
+                }
+            }
+        }
+
+        function renderEditorBoard() {
+            createEditorGrid();
+            editorBoard.querySelectorAll('.editor-vehicle').forEach(e => e.remove());
+
+            editorVehicles.forEach(v => {
+                const el = document.createElement('div');
+                const cls = v.id === 'X' ? 'x' : (['1','2','3','4'].includes(v.id) ? 'truck' : 'car');
+                el.className = `editor-vehicle ${cls}`;
+                el.textContent = v.id;
+
+                const step = 100 / 6;
+                const width = v.dir === 'h' ? v.len * step : step;
+                const height = v.dir === 'v' ? v.len * step : step;
+
+                el.style.left = `calc(${v.col * step}% + 2px)`;
+                el.style.top = `calc(${v.row * step}% + 2px)`;
+                el.style.width = `calc(${width}% - 4px)`;
+                el.style.height = `calc(${height}% - 4px)`;
+
+                el.onclick = e => {
+                    e.stopPropagation();
+                    editorVehicles = editorVehicles.filter(item => item.id !== v.id);
+                    renderEditorBoard();
+                    validateEditorLevel();
+                };
+
+                editorBoard.appendChild(el);
+            });
+        }
+
+        function cellsForVehicle(v) {
+            const cells = [];
+            for (let r = v.row; r < v.row + (v.dir === 'v' ? v.len : 1); r++) {
+                for (let c = v.col; c < v.col + (v.dir === 'h' ? v.len : 1); c++) {
+                    cells.push(`${r},${c}`);
+                }
+            }
+            return cells;
+        }
+
+        function checkCustomOverlap(a, b) {
+            const occupied = new Set(cellsForVehicle(a));
+            return cellsForVehicle(b).some(cell => occupied.has(cell));
+        }
+
+        function placeVehicleInEditor(row, col) {
+            const len = ['1','2','3','4'].includes(editorSelectedType) ? 3 : 2;
+
+            if (editorDir === 'h' && col + len > 6) return;
+            if (editorDir === 'v' && row + len > 6) return;
+
+            const newVehicle = {
+                id: editorSelectedType,
+                dir: editorDir,
+                row,
+                col,
+                len
+            };
+
+            // Cada identificador representa um veículo. Reposicioná-lo substitui a posição anterior.
+            const remaining = editorVehicles.filter(v => v.id !== editorSelectedType);
+
+            if (remaining.some(v => checkCustomOverlap(v, newVehicle))) {
+                playSound('locked');
+                return;
+            }
+
+            editorVehicles = [...remaining, newVehicle];
+            renderEditorBoard();
+            validateEditorLevel();
+        }
+
+        function clearEditorGrid() {
+            editorVehicles = [];
+            customLevelSolution = null;
+            renderEditorBoard();
+            validateEditorLevel();
+        }
+
+        function serializeCustomState(state) {
+            return state
+                .map(v => `${v.id}:${v.row},${v.col}`)
+                .sort()
+                .join('|');
+        }
+
+        function cloneCustomState(state) {
+            return JSON.parse(JSON.stringify(state));
+        }
+
+        function isCustomStateValid(state) {
+            const ids = new Set();
+
+            for (let i = 0; i < state.length; i++) {
+                const v = state[i];
+                if (!v || !v.id || ids.has(v.id)) return false;
+                ids.add(v.id);
+
+                if (!['h','v'].includes(v.dir)) return false;
+                if (![2,3].includes(v.len)) return false;
+                if (!Number.isInteger(v.row) || !Number.isInteger(v.col)) return false;
+
+                if (v.row < 0 || v.col < 0) return false;
+                if (v.dir === 'h' && v.col + v.len > 6) return false;
+                if (v.dir === 'v' && v.row + v.len > 6) return false;
+
+                for (let j = i + 1; j < state.length; j++) {
+                    if (checkCustomOverlap(v, state[j])) return false;
+                }
+            }
+            return true;
+        }
+
+        // BFS: cada movimento de uma casa conta como 1 movimento, exatamente como no jogo.
+        function solvePuzzleBFS(inputVehicles) {
+            const redCar = inputVehicles.find(v => v.id === 'X');
+
+            if (!redCar) {
+                return { solvable: false, error: 'O Carro Vermelho (X) não foi colocado no tabuleiro.' };
+            }
+
+            if (redCar.dir !== 'h' || redCar.row !== 2) {
+                return { solvable: false, error: 'O Carro Vermelho (X) deve ser HORIZONTAL e estar na LINHA 3.' };
+            }
+
+            if (!isCustomStateValid(inputVehicles)) {
+                return { solvable: false, error: 'Existem veículos sobrepostos, duplicados ou fora dos limites.' };
+            }
+
+            const queue = [{ state: cloneCustomState(inputVehicles), moves: 0, path: [] }];
+            const visited = new Set([serializeCustomState(inputVehicles)]);
+            let explored = 0;
+            const MAX_STATES = 30000;
+
+            while (queue.length && explored < MAX_STATES) {
+                const current = queue.shift();
+                explored++;
+
+                const red = current.state.find(v => v.id === 'X');
+                if (red.col + red.len >= 6) {
+                    return { solvable: true, moves: current.moves, path: current.path, explored };
+                }
+
+                for (let i = 0; i < current.state.length; i++) {
+                    const vehicle = current.state[i];
+
+                    for (const delta of [-1, 1]) {
+                        const next = cloneCustomState(current.state);
+                        const target = next[i];
+
+                        if (target.dir === 'h') target.col += delta;
+                        else target.row += delta;
+
+                        if (!isCustomStateValid(next)) continue;
+
+                        const key = serializeCustomState(next);
+                        if (visited.has(key)) continue;
+
+                        visited.add(key);
+                        queue.push({
+                            state: next,
+                            moves: current.moves + 1,
+                            path: [...current.path, { vehicleId: vehicle.id, delta }]
+                        });
+                    }
+                }
+            }
+
+            if (explored >= MAX_STATES) {
+                return { solvable: false, error: 'A busca atingiu o limite de estados. Simplifique a fase e tente novamente.' };
+            }
+
+            return { solvable: false, error: 'Esta configuração não possui solução possível.' };
+        }
+
+        function validateEditorLevel() {
+            const title = document.getElementById('editor-status-title');
+            const desc = document.getElementById('editor-status-desc');
+            const testBtn = document.getElementById('btn-test-custom');
+            const shareBtn = document.getElementById('btn-share-custom');
+
+            const red = editorVehicles.find(v => v.id === 'X');
+
+            testBtn.disabled = true;
+            shareBtn.disabled = true;
+            customLevelSolution = null;
+
+            if (!red) {
+                title.className = 'font-bold text-amber-600';
+                title.textContent = '⚠️ Adicione o Carro X';
+                desc.textContent = 'Selecione o Carro X e coloque-o horizontalmente na linha da saída.';
+                return;
+            }
+
+            if (red.dir !== 'h' || red.row !== 2) {
+                title.className = 'font-bold text-amber-600';
+                title.textContent = '⚠️ Posicionamento incorreto do X';
+                desc.textContent = 'O Carro X precisa ser HORIZONTAL e ficar na LINHA 3.';
+                return;
+            }
+
+            const solution = solvePuzzleBFS(editorVehicles);
+
+            if (solution.solvable) {
+                customLevelSolution = solution;
+                title.className = 'font-bold text-emerald-600';
+                title.textContent = `✅ Fase resolvível — mínimo: ${solution.moves} movimentos`;
+                desc.textContent = `A configuração passou pela validação BFS. ${solution.explored.toLocaleString('pt-BR')} estados foram explorados.`;
+                testBtn.disabled = false;
+                shareBtn.disabled = false;
+            } else {
+                title.className = 'font-bold text-red-600';
+                title.textContent = '❌ Fase não resolvível';
+                desc.textContent = solution.error;
+            }
+        }
+
+        function testCustomLevel() {
+            if (!customLevelSolution) return;
+
+            customLevelData = cloneCustomState(editorVehicles);
+            isCustomLevelMode = true;
+
+            currentLevel = -1;
+            moves = 0;
+            vehicles = customLevelData.map(v => ({
+                x: v.col,
+                y: v.row,
+                length: v.len,
+                isVertical: v.dir === 'v',
+                type: v.id === 'X' ? 0 : (['1','2','3','4'].includes(v.id) ? 2 : 1),
+                customId: v.id
+            }));
+
+            currentLevelTitle.textContent = 'Fase Personalizada';
+            movesCountEl.textContent = '0';
+            bestMovesCountEl.textContent = `${customLevelSolution.moves} min`;
+
+            screenEditor.classList.add('hidden');
+            screenMenu.classList.add('hidden');
+            screenGame.classList.remove('hidden');
+            screenGame.classList.add('flex');
+            document.getElementById('custom-level-banner').classList.remove('hidden');
+
+            renderVehicles();
+        }
+
+        function generateShareLink() {
+            if (!customLevelSolution || !customLevelData) {
+                customLevelData = cloneCustomState(editorVehicles);
+            }
+
+            const json = JSON.stringify(customLevelData);
+            const bytes = new TextEncoder().encode(json);
+            let binary = '';
+            bytes.forEach(b => binary += String.fromCharCode(b));
+
+            const encoded = encodeURIComponent(btoa(binary));
+            const root = 'https://diegodio2712.github.io/jogoestacionamento/';
+            const shareUrl = `${root}?fase=${encoded}`;
+
+            document.getElementById('share-url-input').value = shareUrl;
+            modalShareCustom.classList.add('active');
+        }
+
+        function copyShareUrl() {
+            const input = document.getElementById('share-url-input');
+            navigator.clipboard?.writeText(input.value).then(() => {
+                document.getElementById('share-copy-feedback').classList.remove('hidden');
+                setTimeout(() => document.getElementById('share-copy-feedback').classList.add('hidden'), 2500);
+            }).catch(() => {
+                input.select();
+                document.execCommand('copy');
+                document.getElementById('share-copy-feedback').classList.remove('hidden');
+            });
+        }
+
+        function decodeSharedLevel(encoded) {
+            if (!encoded) throw new Error('Parâmetro "fase" vazio.');
+
+            const candidates = [encoded];
+            try {
+                const once = decodeURIComponent(encoded);
+                if (once !== encoded) candidates.push(once);
+            } catch (_) {}
+
+            for (const candidate of candidates) {
+                try {
+                    let base64 = candidate.replace(/-/g, '+').replace(/_/g, '/');
+                    while (base64.length % 4) base64 += '=';
+
+                    const binary = atob(base64);
+                    const bytes = Uint8Array.from(binary, ch => ch.charCodeAt(0));
+                    const text = new TextDecoder('utf-8').decode(bytes);
+                    const parsed = JSON.parse(text);
+
+                    if (Array.isArray(parsed)) return parsed;
+                } catch (_) {
+                    // tenta o próximo formato
+                }
+            }
+
+            throw new Error('Não foi possível decodificar a fase compartilhada.');
+        }
+
+        function normalizeCustomLevel(decoded) {
+            if (!Array.isArray(decoded)) throw new Error('A fase não contém uma lista de veículos.');
+
+            return decoded.map(v => {
+                if (v.id === undefined || v.row === undefined || v.col === undefined) {
+                    throw new Error('Formato de fase inválido.');
+                }
+                return {
+                    id: String(v.id),
+                    dir: v.dir,
+                    row: Number(v.row),
+                    col: Number(v.col),
+                    len: Number(v.len)
+                };
+            });
+        }
+
+        function loadCustomLevelFromUrl(decoded) {
+            const normalized = normalizeCustomLevel(decoded);
+            const solution = solvePuzzleBFS(normalized);
+
+            if (!solution.solvable) {
+                throw new Error(solution.error);
+            }
+
+            customLevelData = cloneCustomState(normalized);
+            customLevelSolution = solution;
+            isCustomLevelMode = true;
+            currentLevel = -1;
+            moves = 0;
+
+            vehicles = normalized.map(v => ({
+                x: v.col,
+                y: v.row,
+                length: v.len,
+                isVertical: v.dir === 'v',
+                type: v.id === 'X' ? 0 : (['1','2','3','4'].includes(v.id) ? 2 : 1),
+                customId: v.id
+            }));
+
+            currentLevelTitle.textContent = 'Fase Personalizada';
+            movesCountEl.textContent = '0';
+            bestMovesCountEl.textContent = `${solution.moves} min`;
+
+            screenMenu.classList.add('hidden');
+            screenEditor.classList.add('hidden');
+            screenGame.classList.remove('hidden');
+            screenGame.classList.add('flex');
+            document.getElementById('custom-level-banner').classList.remove('hidden');
+
+            renderVehicles();
+            return true;
+        }
+
+        function checkCustomLevelUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const fase = params.get('fase');
+            if (!fase) return false;
+
+            try {
+                loadCustomLevelFromUrl(fase);
+                return true;
+            } catch (e) {
+                console.error('Erro ao carregar fase compartilhada:', e);
+                return false;
+            }
+        }
+
         /* EVENTOS DOS BOTÕES E NAVEGAÇÃO */
         document.getElementById('btn-sound-toggle').onclick = () => {
             soundEnabled = !soundEnabled;
@@ -1126,14 +1772,42 @@
         };
 
         document.getElementById('btn-back-menu').onclick = () => {
+            isCustomLevelMode = false;
+            customLevelData = null;
+            customLevelSolution = null;
+            document.getElementById('custom-level-banner').classList.add('hidden');
             screenGame.classList.remove('flex');
             screenGame.classList.add('hidden');
             screenMenu.classList.remove('hidden');
             renderMenu();
         };
 
+        document.getElementById('btn-open-editor').onclick = switchToEditor;
+        document.getElementById('btn-editor-back').onclick = closeEditor;
+        document.getElementById('editor-dir-h').onclick = () => setEditorDir('h');
+        document.getElementById('editor-dir-v').onclick = () => setEditorDir('v');
+        document.getElementById('palette-X').onclick = () => {
+            editorSelectedType = 'X';
+            renderEditorPalette();
+        };
+        document.getElementById('btn-clear-editor').onclick = clearEditorGrid;
+        document.getElementById('btn-test-custom').onclick = testCustomLevel;
+        document.getElementById('btn-share-custom').onclick = () => {
+            customLevelData = cloneCustomState(editorVehicles);
+            generateShareLink();
+        };
+        document.getElementById('btn-close-share-custom').onclick = () => modalShareCustom.classList.remove('active');
+        document.getElementById('btn-copy-share-url').onclick = copyShareUrl;
+        document.getElementById('btn-dismiss-banner').onclick = () => {
+            document.getElementById('custom-level-banner').classList.add('hidden');
+        };
+
         document.getElementById('btn-restart-level').onclick = () => {
-            startGame(currentLevel);
+            if (isCustomLevelMode && customLevelData) {
+                loadCustomLevelFromUrl(customLevelData);
+            } else {
+                startGame(currentLevel);
+            }
         };
 
         document.getElementById('btn-next-level').onclick = () => {
@@ -1145,6 +1819,10 @@
 
         document.getElementById('btn-win-menu').onclick = () => {
             modalWin.classList.remove('active');
+            isCustomLevelMode = false;
+            customLevelData = null;
+            customLevelSolution = null;
+            document.getElementById('custom-level-banner').classList.add('hidden');
             screenGame.classList.remove('flex');
             screenGame.classList.add('hidden');
             screenMenu.classList.remove('hidden');
@@ -1238,6 +1916,11 @@
         /* INICIALIZAÇÃO */
         initGridCells();
         renderMenu();
+        renderEditorPalette();
+        renderEditorBoard();
+
+        // Se existir ?fase=..., a fase compartilhada é carregada diretamente.
+        checkCustomLevelUrl();
 
     </script>
 </body>
