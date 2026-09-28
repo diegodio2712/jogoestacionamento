@@ -224,6 +224,24 @@
                 </div>
             </div>
 
+            <!-- SEÇÃO DO CÓDIGO DE SALVAMENTO NO MENU INICIAL -->
+            <div class="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 shadow-inner">
+                <div class="w-full sm:w-auto text-center sm:text-left">
+                    <span class="block text-xs font-bold uppercase text-slate-400">🔑 Seu Código de Progresso Atual</span>
+                    <div id="menu-save-code-display" class="font-mono text-base sm:text-lg font-black text-amber-600 tracking-wider bg-white px-3 py-1.5 rounded-xl border border-slate-300 mt-1 select-all inline-block">
+                        ----
+                    </div>
+                </div>
+                <div class="flex w-full sm:w-auto gap-2">
+                    <button id="btn-copy-menu-code" class="flex-1 sm:flex-none bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-3 py-2 rounded-xl text-xs transition flex items-center justify-center gap-1 shadow-sm">
+                        📋 Copiar Código
+                    </button>
+                    <button id="btn-open-load-modal" class="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-700 text-white font-bold px-3 py-2 rounded-xl text-xs transition flex items-center justify-center gap-1 shadow-sm">
+                        📥 Carregar Código
+                    </button>
+                </div>
+            </div>
+
             <!-- Grade de 20 Níveis -->
             <div id="levels-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-4">
                 <!-- Cartões dos níveis serão injetados via JavaScript -->
@@ -285,13 +303,13 @@
     <!-- MODAL 1: VITÓRIA -->
     <div id="modal-win" class="modal-overlay">
         <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center shadow-2xl border-4 border-emerald-500 transform transition-all">
-            <div class="text-5xl mb-3 animate-bounce">🎉</div>
+            <div class="text-5xl mb-2 animate-bounce">🎉</div>
             <h3 class="text-3xl font-title font-bold text-emerald-600">Vaga Liberada!</h3>
-            <p class="text-slate-600 font-semibold mt-2 text-sm sm:text-base">
+            <p class="text-slate-600 font-semibold mt-1 text-sm sm:text-base">
                 Você retirou o <span class="text-red-600 font-bold">Carro X</span> do estacionamento!
             </p>
 
-            <div class="bg-slate-50 rounded-2xl p-4 my-5 border border-slate-200">
+            <div class="bg-slate-50 rounded-2xl p-3.5 my-3 border border-slate-200">
                 <p class="text-xs text-slate-500 font-bold uppercase">Resultado do Desafio</p>
                 <p id="win-moves-text" class="text-2xl font-title font-bold text-slate-800 my-1">12 Movimentos</p>
                 <p id="win-record-badge" class="text-xs font-bold text-emerald-600 bg-emerald-100 py-1 px-3 rounded-full inline-block mt-1">
@@ -299,7 +317,21 @@
                 </p>
             </div>
 
-            <div class="flex flex-col gap-2.5">
+            <!-- BLOSCO DO CÓDIGO DE SALVA APÓS VENCER A FASE -->
+            <div class="bg-amber-50 rounded-2xl p-3 my-3 border border-amber-200 text-left">
+                <p class="text-[11px] text-amber-800 font-bold uppercase text-center">🔑 Código de Salvamento da Fase</p>
+                <div class="flex items-center justify-between gap-2 mt-1.5">
+                    <span id="win-save-code-display" class="font-mono text-sm sm:text-base font-extrabold text-amber-900 tracking-wider bg-white px-2.5 py-1 rounded-lg border border-amber-300 flex-1 text-center select-all">
+                        ----
+                    </span>
+                    <button id="btn-copy-win-code" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-3 py-1.5 rounded-lg text-xs transition whitespace-nowrap shadow-sm">
+                        📋 Copiar
+                    </button>
+                </div>
+                <p class="text-[10px] text-amber-700 text-center mt-1">Guarde este código para restaurar seu jogo depois!</p>
+            </div>
+
+            <div class="flex flex-col gap-2.5 mt-4">
                 <button id="btn-next-level" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-title font-bold py-3 rounded-2xl text-lg shadow-lg transition">
                     Próximo Nível ➔
                 </button>
@@ -343,6 +375,39 @@
         </div>
     </div>
 
+    <!-- MODAL 4: CARREGAR CÓDIGO DE PROGRESSO -->
+    <div id="modal-load-code" class="modal-overlay">
+        <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border-4 border-slate-800">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-xl font-title font-bold text-slate-800 flex items-center gap-2">
+                    📥 Carregar Progresso do Jogo
+                </h3>
+                <button id="btn-close-load-modal" class="text-slate-400 hover:text-slate-600 font-bold text-lg p-1">✕</button>
+            </div>
+            
+            <p class="text-slate-600 font-semibold text-xs sm:text-sm mb-3">
+                Cole ou digite o código de salvamento para restaurar suas fases liberadas e histórico de movimentos.
+            </p>
+
+            <div class="mb-4">
+                <input type="text" id="input-save-code" placeholder="Ex: 8X2K-9M7P-A3F1" 
+                       class="w-full font-mono text-center text-base sm:text-lg uppercase tracking-wider p-3 border-2 border-slate-300 rounded-xl focus:border-amber-500 focus:outline-none bg-slate-50">
+                <p class="text-[11px] text-slate-400 mt-1 text-center">Não diferencia maiúsculas/minúsculas nem hífens.</p>
+            </div>
+
+            <div id="load-code-feedback" class="hidden mb-4 p-3 rounded-xl text-xs font-bold text-left"></div>
+
+            <div class="flex gap-2">
+                <button id="btn-cancel-load" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-title font-bold py-2.5 rounded-2xl text-sm transition">
+                    Cancelar
+                </button>
+                <button id="btn-confirm-load-code" class="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-900 font-title font-bold py-2.5 rounded-2xl text-sm shadow transition">
+                    Restaurar Jogo
+                </button>
+            </div>
+        </div>
+    </div>
+
     <footer class="text-center py-3 text-xs text-slate-500 font-semibold">
         Estacionamento • Atividade de Raciocínio Lógico &amp; Pensamento Computacional
     </footer>
@@ -351,8 +416,6 @@
         /*
           Estrutura dos Veículos nos Níveis:
           [x, y, len, isVertical (1=Sim, 0=Não), tipo (0=Carro X Vermelho, 1=Carro Amarelo, 2=Caminhão Azul)]
-          Grade 6x6. O Carro X sempre fica na linha Y=2 (3ª linha) e tem len=2 e tipo=0.
-          Todas as posições foram rigorosamente checadas contra sobreposições!
         */
         const levelsData = [
             // Nível 1
@@ -403,7 +466,7 @@
         let vehicles = [];
         let soundEnabled = true;
 
-        // Estado do Progresso: { unlocked: maxLevelIndex, bestMoves: { levelIndex: moves } }
+        // Estado do Progresso
         const STORAGE_KEY = 'estacionamento_progress_data_v1';
         let progressData = loadProgress();
 
@@ -421,7 +484,270 @@
             localStorage.setItem(STORAGE_KEY, JSON.stringify(progressData));
         }
 
-        // Sintetizador Web Audio API para Efeitos Sonoros sem arquivos externos
+        /* ================================================================
+           SISTEMA DE CRIPTOGRAFIA, SALVAMENTO E CARREGAMENTO DE CÓDIGO
+           ================================================================ */
+        const BASE36_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+        function bigIntToBase36(bigint) {
+            if (bigint === 0n) return "0";
+            let result = "";
+            let num = bigint;
+            while (num > 0n) {
+                let remainder = Number(num % 36n);
+                result = BASE36_CHARS[remainder] + result;
+                num = num / 36n;
+            }
+            return result;
+        }
+
+        function base36ToBigInt(str) {
+            let result = 0n;
+            const cleanStr = str.toUpperCase().replace(/[^0-9A-Z]/g, '');
+            if (cleanStr.length === 0) return null;
+            for (let i = 0; i < cleanStr.length; i++) {
+                const idx = BASE36_CHARS.indexOf(cleanStr[i]);
+                if (idx < 0) return null;
+                result = result * 36n + BigInt(idx);
+            }
+            return result;
+        }
+
+        function computeChecksum(tsOffset, maxUnlocked, completedCount, bitmap, bestMovesMap) {
+            let str = `${tsOffset}_${maxUnlocked}_${completedCount}_${bitmap}`;
+            for (let i = 0; i < 20; i++) {
+                if (bestMovesMap && bestMovesMap[i] !== undefined) {
+                    str += `_${i}:${bestMovesMap[i]}`;
+                }
+            }
+            str += "_ESTACIONAMENTO_SALT_2026";
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = (hash * 31 + str.charCodeAt(i)) & 0xFF;
+            }
+            return hash;
+        }
+
+        function generateSaveCode(pData) {
+            const nowSec = Math.floor(Date.now() / 1000);
+            const tsOffset = Math.max(0, nowSec - 1704067200); // 28 bits (segundos desde Jan/2024)
+
+            let completedLevels = [];
+            let bitmap = 0;
+            for (let i = 0; i < 20; i++) {
+                if (pData.bestMoves && pData.bestMoves[i] !== undefined) {
+                    completedLevels.push(i);
+                    bitmap |= (1 << i);
+                }
+            }
+            const completedCount = completedLevels.length;
+            const maxUnlocked = Math.min(19, Math.max(0, pData.maxUnlocked || 0));
+
+            let bits = 0n;
+
+            // 1. Pack movimentos de cada fase concluída (7 bits cada)
+            for (let lvl of completedLevels) {
+                let m = Math.min(127, Math.max(1, pData.bestMoves[lvl]));
+                bits = (bits << 7n) | BigInt(m & 0x7F);
+            }
+
+            // 2. Pack bitmap das fases (20 bits)
+            bits = (bits << 20n) | BigInt(bitmap & 0xFFFFF);
+
+            // 3. Pack quantidade de fases concluídas (5 bits)
+            bits = (bits << 5n) | BigInt(completedCount & 0x1F);
+
+            // 4. Pack fase máxima desbloqueada (5 bits)
+            bits = (bits << 5n) | BigInt(maxUnlocked & 0x1F);
+
+            // 5. Pack timestamp (28 bits)
+            bits = (bits << 28n) | BigInt(tsOffset & 0x0FFFFFFF);
+
+            // 6. Pack checksum de segurança (8 bits)
+            const checksum = computeChecksum(tsOffset, maxUnlocked, completedCount, bitmap, pData.bestMoves || {});
+            bits = (bits << 8n) | BigInt(checksum & 0xFF);
+
+            // Converte o BigInt para string Base36
+            const unencryptedPayload = bigIntToBase36(bits);
+
+            // Gera 3 caracteres aleatórios
+            let randomChars = "";
+            for (let i = 0; i < 3; i++) {
+                randomChars += BASE36_CHARS[Math.floor(Math.random() * 36)];
+            }
+
+            // Ofusca a carga de dados usando os 3 caracteres aleatórios
+            let scrambledPayload = "";
+            for (let i = 0; i < unencryptedPayload.length; i++) {
+                let rVal = BASE36_CHARS.indexOf(randomChars[i % 3]);
+                let shift = (rVal + i * 7 + 13) % 36;
+                let origIdx = BASE36_CHARS.indexOf(unencryptedPayload[i]);
+                let newIdx = (origIdx + shift) % 36;
+                scrambledPayload += BASE36_CHARS[newIdx];
+            }
+
+            const rawCode = randomChars + scrambledPayload;
+            return formatCode(rawCode);
+        }
+
+        function formatCode(rawCode) {
+            let result = "";
+            for (let i = 0; i < rawCode.length; i++) {
+                if (i > 0 && i % 4 === 0) result += "-";
+                result += rawCode[i];
+            }
+            return result;
+        }
+
+        function parseSaveCode(codeStr) {
+            if (!codeStr || typeof codeStr !== 'string') {
+                return { success: false, error: "Digite um código válido!" };
+            }
+
+            // Limpa caracteres especiais, espaços e converte para maiúsculo
+            const clean = codeStr.toUpperCase().replace(/[^0-9A-Z]/g, '');
+
+            if (clean.length < 5) {
+                return { success: false, error: "O código digitado é muito curto!" };
+            }
+
+            // Separa os 3 caracteres aleatórios do resto
+            const randomChars = clean.slice(0, 3);
+            const scrambledPayload = clean.slice(3);
+
+            for (let i = 0; i < 3; i++) {
+                if (BASE36_CHARS.indexOf(randomChars[i]) === -1) {
+                    return { success: false, error: "Caracteres inválidos no código!" };
+                }
+            }
+
+            // Desofusca os dados
+            let unencryptedPayload = "";
+            for (let i = 0; i < scrambledPayload.length; i++) {
+                let rVal = BASE36_CHARS.indexOf(randomChars[i % 3]);
+                let shift = (rVal + i * 7 + 13) % 36;
+                let scrambledIdx = BASE36_CHARS.indexOf(scrambledPayload[i]);
+                if (scrambledIdx === -1) {
+                    return { success: false, error: "Código contém caracteres inválidos!" };
+                }
+                let origIdx = (scrambledIdx - shift) % 36;
+                if (origIdx < 0) origIdx += 36;
+                unencryptedPayload += BASE36_CHARS[origIdx];
+            }
+
+            const bits = base36ToBigInt(unencryptedPayload);
+            if (bits === null) {
+                return { success: false, error: "Não foi possível decodificar este código!" };
+            }
+
+            try {
+                let tempBits = bits;
+
+                // 1. Extrai checksum (8 bits)
+                const extractedChecksum = Number(tempBits & 0xFFn);
+                tempBits >>= 8n;
+
+                // 2. Extrai timestamp (28 bits)
+                const tsOffset = Number(tempBits & 0x0FFFFFFFn);
+                tempBits >>= 28n;
+
+                // 3. Extrai maxUnlocked (5 bits)
+                const maxUnlocked = Number(tempBits & 0x1Fn);
+                tempBits >>= 5n;
+
+                // 4. Extrai completedCount (5 bits)
+                const completedCount = Number(tempBits & 0x1Fn);
+                tempBits >>= 5n;
+
+                // 5. Extrai bitmap (20 bits)
+                const bitmap = Number(tempBits & 0xFFFFFn);
+                tempBits >>= 20n;
+
+                // 6. Extrai movimentos das fases em ordem reversa (19 até 0)
+                let bestMoves = {};
+                let actualCompletedCount = 0;
+                for (let i = 19; i >= 0; i--) {
+                    if (bitmap & (1 << i)) {
+                        let m = Number(tempBits & 0x7Fn);
+                        tempBits >>= 7n;
+                        bestMoves[i] = m;
+                        actualCompletedCount++;
+                    }
+                }
+
+                if (actualCompletedCount !== completedCount) {
+                    return { success: false, error: "Código corrompido ou incompleto!" };
+                }
+
+                // Valida Checksum anti-fraude
+                const expectedChecksum = computeChecksum(tsOffset, maxUnlocked, completedCount, bitmap, bestMoves);
+                if (extractedChecksum !== expectedChecksum) {
+                    return { success: false, error: "Código inválido ou falsificado!" };
+                }
+
+                const realTimestampSec = 1704067200 + tsOffset;
+                const saveDate = new Date(realTimestampSec * 1000);
+
+                return {
+                    success: true,
+                    data: {
+                        maxUnlocked,
+                        bestMoves,
+                        timestamp: saveDate,
+                        formattedDate: saveDate.toLocaleString('pt-BR', {
+                            day: '2-digit', month: '2-digit', year: 'numeric',
+                            hour: '2-digit', minute: '2-digit', second: '2-digit'
+                        })
+                    }
+                };
+
+            } catch (err) {
+                return { success: false, error: "Erro ao ler dados do código de salvamento!" };
+            }
+        }
+
+        // Função utilitária para copiar código para a área de transferência
+        function copyToClipboard(text, btnElement) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showCopyFeedback(btnElement);
+                }).catch(() => {
+                    fallbackCopyTextToClipboard(text, btnElement);
+                });
+            } else {
+                fallbackCopyTextToClipboard(text, btnElement);
+            }
+        }
+
+        function fallbackCopyTextToClipboard(text, btnElement) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-999999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showCopyFeedback(btnElement);
+            } catch (err) {
+                alert("Código: " + text);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function showCopyFeedback(btnElement) {
+            if (!btnElement) return;
+            const originalHTML = btnElement.innerHTML;
+            btnElement.innerHTML = '✅ Copiado!';
+            btnElement.classList.add('bg-emerald-600', 'text-white');
+            setTimeout(() => {
+                btnElement.innerHTML = originalHTML;
+                btnElement.classList.remove('bg-emerald-600', 'text-white');
+            }, 2000);
+        }
+
+        /* Sintetizador Web Audio API */
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
         function playSound(type) {
@@ -444,8 +770,7 @@
                 osc.start(now);
                 osc.stop(now + 0.08);
             } else if (type === 'win') {
-                // Arpejo de vitória
-                const notes = [392, 523.25, 659.25, 783.99]; // G4, C5, E5, G5
+                const notes = [392, 523.25, 659.25, 783.99];
                 notes.forEach((freq, idx) => {
                     const noteOsc = audioCtx.createOscillator();
                     const noteGain = audioCtx.createGain();
@@ -469,11 +794,12 @@
             }
         }
 
-        // DOM elements
+        // DOM Elements
         const screenMenu = document.getElementById('screen-menu');
         const screenGame = document.getElementById('screen-game');
         const levelsGrid = document.getElementById('levels-grid');
         const progressText = document.getElementById('progress-text');
+        const menuSaveCodeDisplay = document.getElementById('menu-save-code-display');
         
         const boardEl = document.getElementById('game-board');
         const boardGridCells = document.getElementById('board-grid-cells');
@@ -484,6 +810,7 @@
         const modalWin = document.getElementById('modal-win');
         const modalLocked = document.getElementById('modal-locked');
         const modalReset = document.getElementById('modal-reset');
+        const modalLoadCode = document.getElementById('modal-load-code');
         const lockedMessage = document.getElementById('locked-message');
 
         function renderMenu() {
@@ -544,6 +871,10 @@
             }
 
             progressText.innerText = `${completedCount} / 20 Concluídos`;
+
+            // Atualiza o Código de Salvamento no Menu Inicial
+            const currentCode = generateSaveCode(progressData);
+            menuSaveCodeDisplay.innerText = currentCode;
         }
 
         // Criar as 36 células da grade do tabuleiro
@@ -565,13 +896,12 @@
             const record = progressData.bestMoves[levelIndex];
             bestMovesCountEl.innerText = record !== undefined ? record : '--';
 
-            // Carregar cópia dos dados dos veículos
             vehicles = levelsData[levelIndex].map(item => ({
                 x: item[0],
                 y: item[1],
                 length: item[2],
                 isVertical: item[3] === 1,
-                type: item[4] // 0: Carro X, 1: Carro Amarelo, 2: Caminhão Azul
+                type: item[4]
             }));
 
             renderVehicles();
@@ -582,7 +912,6 @@
         }
 
         function renderVehicles() {
-            // Limpa veículos do nível anterior
             const existingVehicles = boardEl.querySelectorAll('.vehicle');
             existingVehicles.forEach(el => el.remove());
 
@@ -592,12 +921,10 @@
                 el.dataset.index = index;
                 el.dataset.type = v.type;
 
-                // Visual de pára-brisa
                 const glass = document.createElement('div');
                 glass.className = 'vehicle-glass';
                 el.appendChild(glass);
 
-                // Rótulo "X" no carro vermelho
                 if (v.type === 0) {
                     const label = document.createElement('span');
                     label.className = 'vehicle-label text-lg';
@@ -653,12 +980,10 @@
             });
         }
 
-        // Calcula exatamente até onde o veículo pode deslizar sem bater em outros
         function calculateMovementBounds(index) {
             const targetV = vehicles[index];
             const grid = Array(6).fill(null).map(() => Array(6).fill(false));
 
-            // Preenche matriz de ocupação com todos os OUTROS veículos
             vehicles.forEach((v, idx) => {
                 if (idx === index) return;
                 for (let i = 0; i < v.length; i++) {
@@ -674,12 +999,10 @@
                 minBound = targetV.y;
                 maxBound = targetV.y;
 
-                // Limite Cima
                 for (let y = targetV.y - 1; y >= 0; y--) {
                     if (grid[y][targetV.x]) break;
                     minBound = y;
                 }
-                // Limite Baixo
                 for (let y = targetV.y + targetV.length; y < boardSize; y++) {
                     if (grid[y][targetV.x]) break;
                     maxBound = y - targetV.length + 1;
@@ -688,12 +1011,10 @@
                 minBound = targetV.x;
                 maxBound = targetV.x;
 
-                // Limite Esquerda
                 for (let x = targetV.x - 1; x >= 0; x--) {
                     if (grid[targetV.y][x]) break;
                     minBound = x;
                 }
-                // Limite Direita
                 for (let x = targetV.x + targetV.length; x < boardSize; x++) {
                     if (grid[targetV.y][x]) break;
                     maxBound = x - targetV.length + 1;
@@ -733,7 +1054,6 @@
 
             const v = vehicles[activeIndex];
 
-            // Contabiliza movimento apenas se mudou de célula na grade
             if (v.x !== startGridX || v.y !== startGridY) {
                 moves++;
                 movesCountEl.innerText = moves;
@@ -753,11 +1073,9 @@
         function checkWinCondition() {
             const targetCar = vehicles.find(v => v.type === 0);
 
-            // Vitória acontece quando o Carro X (comprimento 2) chega na coluna 4 (ocupando colunas 4 e 5) da linha Y=2
             if (targetCar && targetCar.x + targetCar.length >= boardSize) {
                 playSound('win');
 
-                // Atualizar histórico e desbloqueio
                 const currentRecord = progressData.bestMoves[currentLevel];
                 let isNewRecord = false;
 
@@ -766,7 +1084,6 @@
                     isNewRecord = true;
                 }
 
-                // Desbloquear próximo nível se houver
                 if (currentLevel + 1 > progressData.maxUnlocked && currentLevel + 1 < levelsData.length) {
                     progressData.maxUnlocked = currentLevel + 1;
                 }
@@ -784,6 +1101,10 @@
                     recordBadge.className = 'text-xs font-bold text-slate-600 bg-slate-200 py-1 px-3 rounded-full inline-block mt-1';
                 }
 
+                // Gera e exibe o código atualizado no modal de vitória
+                const newSaveCode = generateSaveCode(progressData);
+                document.getElementById('win-save-code-display').innerText = newSaveCode;
+
                 const btnNextLevel = document.getElementById('btn-next-level');
                 if (currentLevel < levelsData.length - 1) {
                     btnNextLevel.style.display = 'block';
@@ -798,13 +1119,12 @@
             }
         }
 
-        // Botão do Som
+        /* EVENTOS DOS BOTÕES E NAVEGAÇÃO */
         document.getElementById('btn-sound-toggle').onclick = () => {
             soundEnabled = !soundEnabled;
             document.getElementById('btn-sound-toggle').innerText = soundEnabled ? '🔊' : '🔇';
         };
 
-        // Navegação do Jogo
         document.getElementById('btn-back-menu').onclick = () => {
             screenGame.classList.remove('flex');
             screenGame.classList.add('hidden');
@@ -816,7 +1136,6 @@
             startGame(currentLevel);
         };
 
-        // Botoes dos Modais
         document.getElementById('btn-next-level').onclick = () => {
             modalWin.classList.remove('active');
             if (currentLevel < levelsData.length - 1) {
@@ -836,6 +1155,68 @@
             modalLocked.classList.remove('active');
         };
 
+        // Copiar Código no Menu Inicial
+        document.getElementById('btn-copy-menu-code').onclick = function() {
+            const code = menuSaveCodeDisplay.innerText;
+            copyToClipboard(code, this);
+        };
+
+        // Copiar Código no Modal de Vitória
+        document.getElementById('btn-copy-win-code').onclick = function() {
+            const code = document.getElementById('win-save-code-display').innerText;
+            copyToClipboard(code, this);
+        };
+
+        // Modal para Carregar Código
+        const inputSaveCode = document.getElementById('input-save-code');
+        const loadCodeFeedback = document.getElementById('load-code-feedback');
+
+        document.getElementById('btn-open-load-modal').onclick = () => {
+            inputSaveCode.value = '';
+            loadCodeFeedback.className = 'hidden mb-4 p-3 rounded-xl text-xs font-bold text-left';
+            loadCodeFeedback.innerHTML = '';
+            modalLoadCode.classList.add('active');
+            setTimeout(() => inputSaveCode.focus(), 100);
+        };
+
+        document.getElementById('btn-close-load-modal').onclick = () => {
+            modalLoadCode.classList.remove('active');
+        };
+        document.getElementById('btn-cancel-load').onclick = () => {
+            modalLoadCode.classList.remove('active');
+        };
+
+        document.getElementById('btn-confirm-load-code').onclick = () => {
+            const codeTyped = inputSaveCode.value.trim();
+            const result = parseSaveCode(codeTyped);
+
+            if (!result.success) {
+                loadCodeFeedback.className = 'mb-4 p-3 rounded-xl text-xs font-bold text-left bg-red-100 text-red-800 border border-red-300 block';
+                loadCodeFeedback.innerText = `⚠️ ${result.error}`;
+                playSound('locked');
+            } else {
+                progressData = {
+                    maxUnlocked: result.data.maxUnlocked,
+                    bestMoves: result.data.bestMoves
+                };
+                saveProgress();
+
+                const countPassed = Object.keys(result.data.bestMoves).length;
+
+                loadCodeFeedback.className = 'mb-4 p-3 rounded-xl text-xs font-bold text-left bg-emerald-100 text-emerald-900 border border-emerald-300 block';
+                loadCodeFeedback.innerHTML = `
+                    <p class="font-extrabold text-emerald-800">🎉 Jogo Restaurado com Sucesso!</p>
+                    <p class="mt-1 text-[11px]">🕒 Salvamento: <strong>${result.data.formattedDate}</strong></p>
+                    <p class="text-[11px]">🏆 Fases Concluídas: <strong>${countPassed}</strong> (Até o Nível ${result.data.maxUnlocked + 1})</p>
+                `;
+
+                setTimeout(() => {
+                    modalLoadCode.classList.remove('active');
+                    renderMenu();
+                }, 1800);
+            }
+        };
+
         // Resetar Progresso
         document.getElementById('btn-open-reset-modal').onclick = () => {
             modalReset.classList.add('active');
@@ -852,7 +1233,6 @@
             renderMenu();
         };
 
-        // Previne comportamentos indesejados ao arrastar
         document.addEventListener('dragstart', (e) => e.preventDefault());
 
         /* INICIALIZAÇÃO */
