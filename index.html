@@ -32,8 +32,8 @@
             font-family: 'Fredoka', cursive;
         }
 
-        /* Tabuleiro do Estacionamento */
-        #game-board {
+        /* Tabuleiro do Estacionamento (modo livre e modo algoritmo) */
+        #game-board, #algo-board {
             position: relative;
             width: 100%;
             max-width: 440px;
@@ -185,6 +185,22 @@
             cursor: not-allowed;
         }
 
+        /* Seletor de modo no menu */
+        .mode-btn {
+            padding: .5rem 1rem;
+            border-radius: .8rem;
+            font-weight: 800;
+            font-size: .8rem;
+            color: #475569;
+            transition: .15s;
+        }
+        .mode-btn:hover { background: #e2e8f0; }
+        .mode-btn.active {
+            background: #0f172a;
+            color: #fbbf24;
+            box-shadow: 0 2px 6px rgba(0,0,0,.25);
+        }
+
 
         /* ============================================================
            EDITOR DE FASES PERSONALIZADAS
@@ -249,6 +265,156 @@
         .editor-small-item.truck { color:#0369a1; }
         .editor-small-item.truck.selected { background:#38bdf8; color:#082f49; border-color:#0369a1; }
 
+
+        /* ============================================================
+           MODO ALGORITMO
+           ============================================================ */
+        .algo-chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 2.5rem;
+            height: 2.5rem;
+            padding: 0 .55rem;
+            border-radius: .75rem;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: white;
+            cursor: grab;
+            touch-action: none;
+            text-shadow: 1px 1px 2px rgba(0,0,0,.6);
+            box-shadow: inset 0 2px 3px rgba(255,255,255,.35), inset 0 -3px 3px rgba(0,0,0,.3), 0 2px 4px rgba(0,0,0,.25);
+            box-sizing: border-box;
+            transition: transform .1s;
+        }
+        .algo-chip:hover { transform: translateY(-1px); }
+        .algo-chip:active { cursor: grabbing; }
+        .algo-chip.t0 { background: linear-gradient(135deg,#f56565,#e53e3e); border: 2px solid #9b2c2c; }
+        .algo-chip.t1 { background: linear-gradient(135deg,#ecc94b,#d69e2e); border: 2px solid #744210; }
+        .algo-chip.t2 { background: linear-gradient(135deg,#4299e1,#3182ce); border: 2px solid #1a365d; }
+        .algo-chip.arrow { background: linear-gradient(135deg,#475569,#1e293b); border: 2px solid #0f172a; font-size: 1.35rem; }
+        .algo-chip-hint { font-size: .65rem; margin-left: 3px; opacity: .9; }
+        .algo-line .algo-chip { min-width: 2.2rem; height: 2.2rem; font-size: .95rem; }
+        .algo-line .algo-chip.arrow { font-size: 1.15rem; }
+
+        .algo-ghost {
+            position: fixed;
+            pointer-events: none;
+            z-index: 300;
+            transform: translate(-50%, -50%) scale(1.15) rotate(-4deg);
+            opacity: .92;
+            box-shadow: 0 10px 20px rgba(0,0,0,.35);
+        }
+
+        .algo-line {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            padding: .45rem .5rem;
+            border: 2px dashed #cbd5e1;
+            border-radius: 1rem;
+            background: white;
+            min-height: 3.5rem;
+            transition: background .15s, border-color .15s, transform .15s;
+            cursor: pointer;
+        }
+        .algo-line.selected { border-style: solid; border-color: #f59e0b; box-shadow: 0 0 0 2px #fde68a; }
+        .algo-line.current { border-style: solid; border-color: #0ea5e9; background: #e0f2fe; box-shadow: 0 0 0 3px #bae6fd; }
+        .algo-line.done { border-style: solid; border-color: #10b981; background: #ecfdf5; }
+        .algo-line.error { border-style: solid; border-color: #ef4444; background: #fef2f2; animation: algo-shake .4s; }
+        .algo-line.drop-hover, .algo-newline.drop-hover { background: #fef3c7; border-color: #f59e0b; transform: scale(1.015); }
+
+        .algo-line-num {
+            flex: none;
+            width: 1.8rem;
+            height: 1.8rem;
+            border-radius: 999px;
+            background: #e2e8f0;
+            color: #475569;
+            font-weight: 900;
+            font-size: .8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .algo-line.done .algo-line-num { background: #10b981; color: white; }
+        .algo-line.current .algo-line-num { background: #0ea5e9; color: white; }
+        .algo-line.error .algo-line-num { background: #ef4444; color: white; }
+
+        .algo-slot-vehicle {
+            flex: none;
+            width: 2.9rem;
+            height: 2.9rem;
+            border: 2px dashed #cbd5e1;
+            border-radius: .8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-size: .6rem;
+            font-weight: 800;
+            text-align: center;
+            line-height: 1.1;
+        }
+        .algo-slot-vehicle.filled { border-color: transparent; }
+        .algo-slot-moves {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: .3rem;
+            align-items: center;
+            min-height: 2.5rem;
+        }
+        .algo-placeholder { font-size: .7rem; color: #94a3b8; font-weight: 700; }
+        .algo-line-del {
+            flex: none;
+            font-size: .8rem;
+            padding: .3rem .4rem;
+            border-radius: .5rem;
+            opacity: .55;
+        }
+        .algo-line-del:hover { opacity: 1; background: #fee2e2; }
+
+        .algo-newline {
+            border: 2px dashed #94a3b8;
+            border-radius: 1rem;
+            padding: .75rem;
+            text-align: center;
+            font-size: .8rem;
+            font-weight: 800;
+            color: #64748b;
+            cursor: pointer;
+            transition: background .15s, border-color .15s, transform .15s;
+        }
+        .algo-newline:hover { background: #f8fafc; }
+
+        .algo-vehicle { cursor: default; transition: left .24s ease, top .24s ease, opacity .5s, box-shadow .2s, filter .2s; }
+        .algo-vehicle:active { cursor: default; filter: none; }
+        .algo-vehicle.active { outline: 3px solid #38bdf8; outline-offset: 2px; z-index: 25; filter: brightness(1.1); }
+        .algo-vehicle.crash { outline: 3px solid #ef4444; outline-offset: 2px; z-index: 25; animation: algo-shake .4s; }
+
+        @keyframes algo-shake {
+            0%, 100% { translate: 0 0; }
+            20% { translate: -5px 0; }
+            40% { translate: 5px 0; }
+            60% { translate: -4px 0; }
+            80% { translate: 4px 0; }
+        }
+
+        .algo-ctrl {
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+            border-radius: 1rem;
+            padding: .6rem .3rem;
+            font-size: .85rem;
+            line-height: 1.1;
+            box-shadow: 0 2px 6px rgba(0,0,0,.15);
+            transition: .15s;
+        }
+        .algo-ctrl span { display: block; font-size: 1.3rem; margin-bottom: 2px; }
+        .algo-ctrl:disabled { opacity: .4; cursor: not-allowed; }
+
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between text-slate-800">
@@ -289,6 +455,15 @@
                 <div class="mt-3 inline-flex items-center gap-2 bg-amber-100 text-amber-900 px-4 py-1.5 rounded-full text-xs font-bold border border-amber-300">
                     <span>🏆 Progresso:</span>
                     <span id="progress-text" class="text-amber-700">0 / 20 Concluídos</span>
+                </div>
+
+                <!-- SELETOR DE MODO DE JOGO -->
+                <div class="mt-4">
+                    <div class="inline-flex bg-slate-100 border border-slate-300 rounded-2xl p-1 gap-1">
+                        <button id="btn-mode-free" class="mode-btn">🎮 Modo Livre</button>
+                        <button id="btn-mode-algo" class="mode-btn">🧩 Modo Algoritmo</button>
+                    </div>
+                    <p id="mode-desc" class="text-xs text-slate-500 font-semibold mt-2"></p>
                 </div>
             </div>
 
@@ -441,6 +616,95 @@
 
             <!-- Veículos renderizados via JS -->
         </div>
+
+        <button id="btn-to-algo" class="mt-6 bg-white hover:bg-slate-50 text-slate-700 font-bold px-4 py-2.5 rounded-xl text-sm shadow border border-slate-300 transition">
+            🧩 Resolver esta fase no Modo Algoritmo
+        </button>
+    </main>
+
+    <!-- TELA 4: MODO ALGORITMO -->
+    <main id="screen-algo" class="hidden flex-grow max-w-5xl w-full mx-auto p-4">
+
+        <div class="flex justify-between items-center mb-4 gap-2">
+            <button id="btn-algo-menu" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-4 py-2 rounded-xl text-sm shadow transition border border-slate-700">
+                ⬅️ Menu
+            </button>
+            <div class="text-center">
+                <h2 id="algo-level-title" class="text-xl font-title font-bold text-slate-800">Nível 1</h2>
+                <p class="text-xs font-bold text-slate-500">🧩 Modo Algoritmo</p>
+            </div>
+            <button id="btn-algo-to-free" class="bg-white hover:bg-slate-100 text-slate-700 font-bold px-3 py-2 rounded-xl text-xs shadow border border-slate-300 transition">
+                🎮 Modo livre
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+
+            <!-- Coluna do tabuleiro e controles -->
+            <div class="lg:sticky lg:top-4">
+                <div class="w-full max-w-[440px] mx-auto bg-white rounded-2xl p-3 mb-4 shadow-md flex justify-around items-center border border-slate-200">
+                    <div class="text-center">
+                        <span class="block text-xs text-slate-400 font-bold uppercase">Passo</span>
+                        <span id="algo-stat-step" class="text-2xl font-title font-black text-sky-600">0 / 1</span>
+                    </div>
+                    <div class="h-8 w-px bg-slate-200"></div>
+                    <div class="text-center">
+                        <span class="block text-xs text-slate-400 font-bold uppercase">Casas andadas</span>
+                        <span id="algo-stat-cells" class="text-2xl font-title font-black text-amber-600">0</span>
+                    </div>
+                </div>
+
+                <div id="algo-board">
+                    <div class="exit-gate">S<br>A<br>Í<br>D<br>A</div>
+                    <div class="board-grid" id="algo-board-grid"></div>
+                </div>
+
+                <div class="w-full max-w-[440px] mx-auto grid grid-cols-3 gap-2 mt-5">
+                    <button id="btn-algo-reset" class="algo-ctrl bg-slate-200 hover:bg-slate-300 text-slate-700">
+                        <span>⏮️</span>Voltar ao início
+                    </button>
+                    <button id="btn-algo-step" class="algo-ctrl bg-sky-500 hover:bg-sky-600 text-white">
+                        <span>⏭️</span>Próximo passo
+                    </button>
+                    <button id="btn-algo-run" class="algo-ctrl bg-emerald-500 hover:bg-emerald-600 text-white">
+                        <span>▶️</span>Executar tudo
+                    </button>
+                </div>
+
+                <div id="algo-feedback" class="w-full max-w-[440px] mx-auto mt-3 p-3 rounded-xl text-xs font-bold border"></div>
+            </div>
+
+            <!-- Coluna dos blocos e do algoritmo -->
+            <div class="space-y-4">
+                <div class="bg-white/95 border border-slate-200 rounded-2xl p-4 shadow-md">
+                    <h3 class="text-xs font-black uppercase tracking-wider text-slate-500 mb-1">🧱 Blocos</h3>
+                    <p class="text-[11px] text-slate-400 font-semibold mb-3">
+                        Arraste para uma linha do algoritmo — ou toque para adicionar na linha selecionada.
+                    </p>
+                    <div class="text-[11px] font-bold text-slate-400 mb-1">Veículos</div>
+                    <div id="algo-palette-vehicles" class="flex flex-wrap gap-1.5 mb-3"></div>
+                    <div class="text-[11px] font-bold text-slate-400 mb-1">Direções</div>
+                    <div id="algo-palette-moves" class="flex flex-wrap gap-1.5"></div>
+                </div>
+
+                <div class="bg-white/95 border border-slate-200 rounded-2xl p-4 shadow-md">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-xs font-black uppercase tracking-wider text-slate-500">📜 Algoritmo</h3>
+                        <button id="btn-algo-clear" class="text-[11px] font-bold text-red-500 hover:bg-red-50 px-2 py-1 rounded-lg border border-red-200 transition">
+                            🗑️ Limpar
+                        </button>
+                    </div>
+                    <div id="algo-program" class="space-y-2"></div>
+                    <div id="algo-newline" data-drop="newline" class="algo-newline mt-2">
+                        ➕ Novo passo
+                        <span class="block text-[10px] font-semibold text-slate-400 mt-0.5">arraste um bloco aqui ou toque</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 font-semibold mt-2 text-center">
+                        Toque em um bloco dentro do algoritmo para removê-lo (ou arraste-o para fora).
+                    </p>
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- MODAL 1: VITÓRIA -->
@@ -477,6 +741,9 @@
             <div class="flex flex-col gap-2.5 mt-4">
                 <button id="btn-next-level" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-title font-bold py-3 rounded-2xl text-lg shadow-lg transition">
                     Próximo Nível ➔
+                </button>
+                <button id="btn-win-stay" class="w-full bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-title font-bold py-2.5 rounded-2xl text-md transition">
+                    Continuar nesta fase
                 </button>
                 <button id="btn-win-menu" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-title font-bold py-2.5 rounded-2xl text-md transition">
                     Voltar ao Menu
@@ -970,6 +1237,7 @@
         // DOM Elements
         const screenMenu = document.getElementById('screen-menu');
         const screenGame = document.getElementById('screen-game');
+        const screenAlgo = document.getElementById('screen-algo');
         const levelsGrid = document.getElementById('levels-grid');
         const progressText = document.getElementById('progress-text');
         const menuSaveCodeDisplay = document.getElementById('menu-save-code-display');
@@ -979,6 +1247,8 @@
         const currentLevelTitle = document.getElementById('current-level-title');
         const movesCountEl = document.getElementById('moves-count');
         const bestMovesCountEl = document.getElementById('best-moves-count');
+
+        const algoBoard = document.getElementById('algo-board');
 
         const modalWin = document.getElementById('modal-win');
         const modalLocked = document.getElementById('modal-locked');
@@ -991,6 +1261,7 @@
 
         function renderMenu() {
             levelsGrid.innerHTML = '';
+            renderModeToggle();
             
             let completedCount = 0;
 
@@ -1035,7 +1306,7 @@
 
                 card.onclick = () => {
                     if (isUnlocked) {
-                        startGame(i);
+                        startLevel(i);
                     } else {
                         playSound('locked');
                         lockedMessage.innerText = `Você precisa concluir o Nível ${i} primeiro para desbloquear este desafio!`;
@@ -1056,14 +1327,18 @@
         // Criar as 36 células da grade do tabuleiro
         function initGridCells() {
             boardGridCells.innerHTML = '';
+            const algoGrid = document.getElementById('algo-board-grid');
+            algoGrid.innerHTML = '';
             for (let i = 0; i < 36; i++) {
                 const cell = document.createElement('div');
                 cell.className = 'board-cell';
                 boardGridCells.appendChild(cell);
+                algoGrid.appendChild(cell.cloneNode());
             }
         }
 
         function startGame(levelIndex) {
+            abortAlgoRun();
             isCustomLevelMode = false;
             customLevelData = null;
             customLevelSolution = null;
@@ -1087,8 +1362,15 @@
             renderVehicles();
 
             screenMenu.classList.add('hidden');
+            screenAlgo.classList.add('hidden');
             screenGame.classList.remove('hidden');
             screenGame.classList.add('flex');
+        }
+
+        // Abre a fase no modo escolhido no menu (livre ou algoritmo)
+        function startLevel(levelIndex) {
+            startGame(levelIndex);
+            if (gameMode === 'algo') startAlgoMode();
         }
 
         function renderVehicles() {
@@ -1254,61 +1536,68 @@
             const targetCar = vehicles.find(v => v.type === 0);
 
             if (targetCar && targetCar.x + targetCar.length >= boardSize) {
-                if (isCustomLevelMode) {
-                    playSound('win');
-                    document.getElementById('win-moves-text').innerText = `${moves} Movimentos`;
-                    document.getElementById('win-record-badge').innerText =
-                        `🧮 Mínimo matemático: ${customLevelSolution ? customLevelSolution.moves : '--'} movimentos`;
-                    document.getElementById('win-record-badge').className =
-                        'text-xs font-bold text-sky-700 bg-sky-100 py-1 px-3 rounded-full inline-block mt-1';
-                    document.getElementById('win-save-code-display').innerText = 'FASE PERSONALIZADA';
-                    document.getElementById('btn-next-level').style.display = 'none';
-                    setTimeout(() => modalWin.classList.add('active'), 200);
-                    return;
-                }
-                playSound('win');
-
-                const currentRecord = progressData.bestMoves[currentLevel];
-                let isNewRecord = false;
-
-                if (currentRecord === undefined || moves < currentRecord) {
-                    progressData.bestMoves[currentLevel] = moves;
-                    isNewRecord = true;
-                }
-
-                if (currentLevel + 1 > progressData.maxUnlocked && currentLevel + 1 < levelsData.length) {
-                    progressData.maxUnlocked = currentLevel + 1;
-                }
-
-                saveProgress();
-
-                // Exibir modal de vitória
-                document.getElementById('win-moves-text').innerText = `${moves} Movimentos`;
-                const recordBadge = document.getElementById('win-record-badge');
-                if (isNewRecord) {
-                    recordBadge.innerText = '🌟 Novo Recorde Pessoal!';
-                    recordBadge.className = 'text-xs font-bold text-emerald-700 bg-emerald-100 py-1 px-3 rounded-full inline-block mt-1';
-                } else {
-                    recordBadge.innerText = `Melhor anterior: ${currentRecord} mov`;
-                    recordBadge.className = 'text-xs font-bold text-slate-600 bg-slate-200 py-1 px-3 rounded-full inline-block mt-1';
-                }
-
-                // Gera e exibe o código atualizado no modal de vitória
-                const newSaveCode = generateSaveCode(progressData);
-                document.getElementById('win-save-code-display').innerText = newSaveCode;
-
-                const btnNextLevel = document.getElementById('btn-next-level');
-                if (currentLevel < levelsData.length - 1) {
-                    btnNextLevel.style.display = 'block';
-                    btnNextLevel.innerText = `Próximo Nível (${currentLevel + 2}) ➔`;
-                } else {
-                    btnNextLevel.style.display = 'none';
-                }
-
-                setTimeout(() => {
-                    modalWin.classList.add('active');
-                }, 200);
+                showVictory(moves, `${moves} Movimentos`);
             }
+        }
+
+        /*
+          Registra a vitória (progresso, recorde, código) e abre o modal.
+          score     -> número salvo como marca (movimentos no modo livre, passos no modo algoritmo)
+          scoreText -> texto exibido no modal
+        */
+        function showVictory(score, scoreText) {
+            playSound('win');
+            document.getElementById('win-moves-text').innerText = scoreText;
+
+            if (isCustomLevelMode) {
+                document.getElementById('win-record-badge').innerText =
+                    `🧮 Mínimo matemático: ${customLevelSolution ? customLevelSolution.moves : '--'} movimentos`;
+                document.getElementById('win-record-badge').className =
+                    'text-xs font-bold text-sky-700 bg-sky-100 py-1 px-3 rounded-full inline-block mt-1';
+                document.getElementById('win-save-code-display').innerText = 'FASE PERSONALIZADA';
+                document.getElementById('btn-next-level').style.display = 'none';
+                setTimeout(() => modalWin.classList.add('active'), 200);
+                return;
+            }
+
+            const currentRecord = progressData.bestMoves[currentLevel];
+            let isNewRecord = false;
+
+            if (currentRecord === undefined || score < currentRecord) {
+                progressData.bestMoves[currentLevel] = score;
+                isNewRecord = true;
+            }
+
+            if (currentLevel + 1 > progressData.maxUnlocked && currentLevel + 1 < levelsData.length) {
+                progressData.maxUnlocked = currentLevel + 1;
+            }
+
+            saveProgress();
+
+            const recordBadge = document.getElementById('win-record-badge');
+            if (isNewRecord) {
+                recordBadge.innerText = '🌟 Novo Recorde Pessoal!';
+                recordBadge.className = 'text-xs font-bold text-emerald-700 bg-emerald-100 py-1 px-3 rounded-full inline-block mt-1';
+            } else {
+                recordBadge.innerText = `Melhor anterior: ${currentRecord} mov`;
+                recordBadge.className = 'text-xs font-bold text-slate-600 bg-slate-200 py-1 px-3 rounded-full inline-block mt-1';
+            }
+
+            // Gera e exibe o código atualizado no modal de vitória
+            const newSaveCode = generateSaveCode(progressData);
+            document.getElementById('win-save-code-display').innerText = newSaveCode;
+
+            const btnNextLevel = document.getElementById('btn-next-level');
+            if (currentLevel < levelsData.length - 1) {
+                btnNextLevel.style.display = 'block';
+                btnNextLevel.innerText = `Próximo Nível (${currentLevel + 2}) ➔`;
+            } else {
+                btnNextLevel.style.display = 'none';
+            }
+
+            setTimeout(() => {
+                modalWin.classList.add('active');
+            }, 200);
         }
 
 
@@ -1317,9 +1606,11 @@
            ================================================================ */
 
         function switchToEditor() {
+            abortAlgoRun();
             screenMenu.classList.add('hidden');
             screenGame.classList.add('hidden');
             screenGame.classList.remove('flex');
+            screenAlgo.classList.add('hidden');
             screenEditor.classList.remove('hidden');
             editorVehicles = [];
             editorSelectedType = 'X';
@@ -1632,11 +1923,13 @@
 
             screenEditor.classList.add('hidden');
             screenMenu.classList.add('hidden');
+            screenAlgo.classList.add('hidden');
             screenGame.classList.remove('hidden');
             screenGame.classList.add('flex');
             document.getElementById('custom-level-banner').classList.remove('hidden');
 
             renderVehicles();
+            if (gameMode === 'algo') startAlgoMode();
         }
 
         // ================================================================
@@ -1713,6 +2006,7 @@
         }
 
         function loadCustomLevelFromUrl(decoded) {
+            abortAlgoRun();
             const normalized = normalizeCustomLevel(decoded);
             const solution = solvePuzzleBFS(normalized);
 
@@ -1741,6 +2035,7 @@
 
             screenMenu.classList.add('hidden');
             screenEditor.classList.add('hidden');
+            screenAlgo.classList.add('hidden');
             screenGame.classList.remove('hidden');
             screenGame.classList.add('flex');
             document.getElementById('custom-level-banner').classList.remove('hidden');
@@ -1767,6 +2062,7 @@
                 }
 
                 loadCustomLevelFromUrl(decoded);
+                if (gameMode === 'algo') startAlgoMode();
                 return true;
             } catch (e) {
                 console.error('Erro ao carregar fase compartilhada:', e);
@@ -1774,21 +2070,694 @@
             }
         }
 
-        /* EVENTOS DOS BOTÕES E NAVEGAÇÃO */
-        document.getElementById('btn-sound-toggle').onclick = () => {
-            soundEnabled = !soundEnabled;
-            document.getElementById('btn-sound-toggle').innerText = soundEnabled ? '🔊' : '🔇';
-        };
 
-        document.getElementById('btn-back-menu').onclick = () => {
+        /* ================================================================
+           MODO ALGORITMO
+           O jogador monta uma sequência de passos (veículo + setas) com
+           arrastar e soltar, e depois executa passo a passo ou tudo de uma vez.
+           ================================================================ */
+        const MODE_KEY = 'estacionamento_mode_v1';
+        let gameMode = (() => {
+            try { return localStorage.getItem(MODE_KEY) === 'algo' ? 'algo' : 'free'; }
+            catch (e) { return 'free'; }
+        })();
+
+        const ALGO_DIRS = {
+            L: { dx: -1, dy: 0, sym: '←' },
+            R: { dx: 1,  dy: 0, sym: '→' },
+            U: { dx: 0,  dy: -1, sym: '↑' },
+            D: { dx: 0,  dy: 1, sym: '↓' }
+        };
+        const ALGO_STEP_MS = 280;   // tempo de cada casa andada
+        const ALGO_LINE_GAP_MS = 180; // pausa entre passos no "Executar tudo"
+
+        let algoInitial = [];      // veículos no estado inicial (com rótulos)
+        let algoVehicles = [];     // estado atual durante a execução
+        let algoProgram = [];      // [{ vehicle: 'A', moves: ['R','R'] }, ...]
+        let algoStatus = [];       // '' | 'current' | 'done' | 'error' para cada passo
+        let algoPc = 0;            // índice do próximo passo a executar
+        let algoCells = 0;         // casas andadas no total
+        let algoRunning = false;
+        let algoStopRequested = false;
+        let algoFinished = false;  // venceu ou deu erro: é preciso voltar ao início
+        let algoSelectedLine = 0;  // linha que recebe os blocos tocados
+        let algoRunId = 0;         // invalida execuções antigas (reset, menu etc.)
+        const algoProgramsByLevel = {};
+
+        const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+        function setGameMode(mode) {
+            gameMode = mode;
+            try { localStorage.setItem(MODE_KEY, mode); } catch (e) {}
+            renderModeToggle();
+        }
+
+        function renderModeToggle() {
+            document.getElementById('btn-mode-free').classList.toggle('active', gameMode === 'free');
+            document.getElementById('btn-mode-algo').classList.toggle('active', gameMode === 'algo');
+            document.getElementById('mode-desc').textContent = gameMode === 'algo'
+                ? 'Monte um algoritmo com blocos (ex.: X → →) e execute para ver se o Carro X sai.'
+                : 'Arraste os veículos diretamente no tabuleiro.';
+        }
+
+        function abortAlgoRun() {
+            algoRunId++;
+            algoRunning = false;
+            algoStopRequested = false;
+        }
+
+        function getCurrentLevelVehicles() {
+            if (isCustomLevelMode && customLevelData) {
+                return customLevelData.map(v => ({
+                    x: v.col,
+                    y: v.row,
+                    length: v.len,
+                    isVertical: v.dir === 'v',
+                    type: v.id === 'X' ? 0 : (['1','2','3','4'].includes(v.id) ? 2 : 1),
+                    customId: v.id
+                }));
+            }
+            return levelsData[currentLevel].map(item => ({
+                x: item[0],
+                y: item[1],
+                length: item[2],
+                isVertical: item[3] === 1,
+                type: item[4]
+            }));
+        }
+
+        // Dá um nome a cada veículo: X (vermelho), letras (carros), C1, C2... (caminhões)
+        function labelVehicles(list) {
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWYZ'; // sem o X
+            let carCount = 0, truckCount = 0;
+            return list.map(v => {
+                let label;
+                if (v.type === 0) label = 'X';
+                else if (v.customId) label = v.type === 2 ? `C${v.customId}` : v.customId;
+                else if (v.type === 2) label = `C${++truckCount}`;
+                else label = letters[carCount++];
+                return { ...v, label };
+            });
+        }
+
+        function vehicleName(v) {
+            if (!v) return 'veículo';
+            if (v.type === 0) return 'Carro X';
+            if (v.type === 2) return `Caminhão ${v.label}`;
+            return `Carro ${v.label}`;
+        }
+
+        function algoLevelKey() {
+            return isCustomLevelMode ? `custom:${JSON.stringify(customLevelData)}` : `lvl${currentLevel}`;
+        }
+
+        function startAlgoMode() {
+            abortAlgoRun();
+            algoInitial = labelVehicles(getCurrentLevelVehicles());
+
+            const key = algoLevelKey();
+            if (!algoProgramsByLevel[key]) algoProgramsByLevel[key] = [{ vehicle: null, moves: [] }];
+            algoProgram = algoProgramsByLevel[key];
+            algoSelectedLine = algoProgram.length - 1;
+
+            document.getElementById('algo-level-title').textContent =
+                isCustomLevelMode ? 'Fase Personalizada' : `Nível ${currentLevel + 1}`;
+
+            renderAlgoPalette();
+            resetAlgoExecution();
+
+            screenMenu.classList.add('hidden');
+            screenEditor.classList.add('hidden');
+            screenGame.classList.add('hidden');
+            screenGame.classList.remove('flex');
+            screenAlgo.classList.remove('hidden');
+            window.scrollTo({ top: 0 });
+        }
+
+        function resetAlgoExecution() {
+            abortAlgoRun();
+            algoVehicles = algoInitial.map(v => ({ ...v }));
+            algoPc = 0;
+            algoCells = 0;
+            algoFinished = false;
+            algoStatus = algoProgram.map(() => '');
+            renderAlgoBoard();
+            renderAlgoProgram();
+            updateAlgoStats();
+            updateAlgoControls();
+            setAlgoFeedback('info', '💡 Cada linha é um passo: um veículo + as setas de para onde ele anda. Ex.: X → → faz o Carro X andar 2 casas para a direita.');
+        }
+
+        /* ---------- Renderização ---------- */
+
+        function renderAlgoBoard() {
+            algoBoard.querySelectorAll('.vehicle').forEach(el => el.remove());
+            algoVehicles.forEach(v => {
+                const el = document.createElement('div');
+                el.className = `vehicle algo-vehicle ${v.isVertical ? 'vertical' : 'horizontal'}`;
+                el.dataset.type = v.type;
+                el.dataset.label = v.label;
+
+                const glass = document.createElement('div');
+                glass.className = 'vehicle-glass';
+                el.appendChild(glass);
+
+                const label = document.createElement('span');
+                label.className = 'vehicle-label text-base';
+                label.innerText = v.label;
+                el.appendChild(label);
+
+                updateVehicleDOMPosition(el, v);
+                algoBoard.appendChild(el);
+            });
+        }
+
+        function algoVehicleEl(label) {
+            return algoBoard.querySelector(`.algo-vehicle[data-label="${label}"]`);
+        }
+
+        function sortedPaletteVehicles() {
+            const order = v => v.type === 0 ? 0 : (v.type === 1 ? 1 : 2);
+            return [...algoInitial].sort((a, b) =>
+                order(a) - order(b) || a.label.localeCompare(b.label, 'pt-BR', { numeric: true })
+            );
+        }
+
+        function makeAlgoChip(item) {
+            const el = document.createElement('div');
+            if (item.kind === 'vehicle') {
+                const v = algoInitial.find(x => x.label === item.value);
+                el.className = `algo-chip t${v ? v.type : 1}`;
+                el.textContent = item.value;
+                if (v && item.fromLine === undefined) {
+                    const hint = document.createElement('span');
+                    hint.className = 'algo-chip-hint';
+                    hint.textContent = v.isVertical ? '↕' : '↔';
+                    el.appendChild(hint);
+                    el.title = `${vehicleName(v)} (${v.isVertical ? 'vertical: anda ↑ ↓' : 'horizontal: anda ← →'})`;
+                }
+            } else {
+                el.className = 'algo-chip arrow';
+                el.textContent = ALGO_DIRS[item.value].sym;
+            }
+            el.addEventListener('pointerdown', e => startAlgoDrag(e, item, el));
+            return el;
+        }
+
+        function renderAlgoPalette() {
+            const vbox = document.getElementById('algo-palette-vehicles');
+            const mbox = document.getElementById('algo-palette-moves');
+            vbox.innerHTML = '';
+            mbox.innerHTML = '';
+            sortedPaletteVehicles().forEach(v => vbox.appendChild(makeAlgoChip({ kind: 'vehicle', value: v.label })));
+            ['L', 'R', 'U', 'D'].forEach(d => mbox.appendChild(makeAlgoChip({ kind: 'move', value: d })));
+        }
+
+        function renderAlgoProgram() {
+            const list = document.getElementById('algo-program');
+            list.innerHTML = '';
+
+            algoProgram.forEach((line, i) => {
+                const status = algoStatus[i] || '';
+                const row = document.createElement('div');
+                row.className = `algo-line ${status} ${(i === algoSelectedLine && !status) ? 'selected' : ''}`;
+                row.dataset.drop = 'line';
+                row.dataset.line = i;
+                row.onclick = () => {
+                    if (algoRunning) return;
+                    algoSelectedLine = i;
+                    renderAlgoProgram();
+                };
+
+                const num = document.createElement('div');
+                num.className = 'algo-line-num';
+                num.textContent = status === 'done' ? '✓' : (status === 'error' ? '!' : i + 1);
+                row.appendChild(num);
+
+                const vSlot = document.createElement('div');
+                vSlot.className = `algo-slot-vehicle ${line.vehicle ? 'filled' : ''}`;
+                if (line.vehicle) {
+                    vSlot.appendChild(makeAlgoChip({ kind: 'vehicle', value: line.vehicle, fromLine: i }));
+                } else {
+                    vSlot.textContent = 'veículo';
+                }
+                row.appendChild(vSlot);
+
+                const mSlot = document.createElement('div');
+                mSlot.className = 'algo-slot-moves';
+                if (line.moves.length) {
+                    line.moves.forEach((m, j) => {
+                        mSlot.appendChild(makeAlgoChip({ kind: 'move', value: m, fromLine: i, fromIdx: j }));
+                    });
+                } else {
+                    const ph = document.createElement('span');
+                    ph.className = 'algo-placeholder';
+                    ph.textContent = 'arraste as setas aqui';
+                    mSlot.appendChild(ph);
+                }
+                row.appendChild(mSlot);
+
+                const del = document.createElement('button');
+                del.className = 'algo-line-del';
+                del.title = 'Apagar este passo';
+                del.textContent = '🗑️';
+                del.onclick = e => {
+                    e.stopPropagation();
+                    if (algoRunning) return;
+                    algoProgram.splice(i, 1);
+                    if (algoProgram.length === 0) algoProgram.push({ vehicle: null, moves: [] });
+                    algoSelectedLine = Math.min(algoSelectedLine, algoProgram.length - 1);
+                    onAlgoProgramEdited();
+                };
+                row.appendChild(del);
+
+                list.appendChild(row);
+            });
+        }
+
+        function updateAlgoStats() {
+            document.getElementById('algo-stat-step').textContent =
+                `${Math.min(algoPc, algoProgram.length)} / ${algoProgram.length}`;
+            document.getElementById('algo-stat-cells').textContent = algoCells;
+        }
+
+        function updateAlgoControls() {
+            const stepBtn = document.getElementById('btn-algo-step');
+            const runBtn = document.getElementById('btn-algo-run');
+            stepBtn.disabled = algoRunning;
+            if (algoRunning) {
+                runBtn.innerHTML = '<span>⏸️</span>Pausar';
+                runBtn.className = 'algo-ctrl bg-amber-500 hover:bg-amber-600 text-slate-900';
+            } else {
+                runBtn.innerHTML = '<span>▶️</span>Executar tudo';
+                runBtn.className = 'algo-ctrl bg-emerald-500 hover:bg-emerald-600 text-white';
+            }
+        }
+
+        function setAlgoFeedback(kind, text) {
+            const styles = {
+                info: 'bg-slate-50 text-slate-600 border-slate-200',
+                warn: 'bg-amber-50 text-amber-800 border-amber-300',
+                error: 'bg-red-50 text-red-700 border-red-300',
+                success: 'bg-emerald-50 text-emerald-800 border-emerald-300'
+            };
+            const box = document.getElementById('algo-feedback');
+            box.className = `w-full max-w-[440px] mx-auto mt-3 p-3 rounded-xl text-xs font-bold border ${styles[kind] || styles.info}`;
+            box.textContent = text;
+        }
+
+        // Qualquer alteração no algoritmo volta o estacionamento ao início
+        function onAlgoProgramEdited() {
+            if (algoPc > 0 || algoFinished) {
+                resetAlgoExecution();
+                setAlgoFeedback('info', '✏️ O algoritmo foi alterado, então o estacionamento voltou ao estado inicial.');
+            } else {
+                algoStatus = algoProgram.map(() => '');
+                renderAlgoProgram();
+                updateAlgoStats();
+            }
+        }
+
+        /* ---------- Arrastar e soltar (funciona com mouse e toque) ---------- */
+
+        let algoDrag = null;
+
+        function startAlgoDrag(e, item, sourceEl) {
+            if (algoRunning) return;
+            if (e.button !== undefined && e.button !== 0) return;
+            e.preventDefault();
+            e.stopPropagation();
+            algoDrag = { item, sourceEl, startX: e.clientX, startY: e.clientY, ghost: null, moved: false, hover: null };
+            window.addEventListener('pointermove', onAlgoDragMove);
+            window.addEventListener('pointerup', onAlgoDragEnd);
+            window.addEventListener('pointercancel', onAlgoDragCancel);
+        }
+
+        function getAlgoDropTarget(x, y) {
+            const el = document.elementFromPoint(x, y);
+            return el ? el.closest('[data-drop]') : null;
+        }
+
+        function onAlgoDragMove(e) {
+            const d = algoDrag;
+            if (!d) return;
+            if (!d.moved) {
+                if (Math.hypot(e.clientX - d.startX, e.clientY - d.startY) < 6) return;
+                d.moved = true;
+                d.ghost = d.sourceEl.cloneNode(true);
+                d.ghost.classList.add('algo-ghost');
+                document.body.appendChild(d.ghost);
+                if (d.item.fromLine !== undefined) d.sourceEl.style.opacity = '0.3';
+            }
+            e.preventDefault();
+            d.ghost.style.left = `${e.clientX}px`;
+            d.ghost.style.top = `${e.clientY}px`;
+
+            const target = getAlgoDropTarget(e.clientX, e.clientY);
+            if (target !== d.hover) {
+                if (d.hover) d.hover.classList.remove('drop-hover');
+                if (target) target.classList.add('drop-hover');
+                d.hover = target;
+            }
+        }
+
+        function cleanupAlgoDrag() {
+            window.removeEventListener('pointermove', onAlgoDragMove);
+            window.removeEventListener('pointerup', onAlgoDragEnd);
+            window.removeEventListener('pointercancel', onAlgoDragCancel);
+            if (algoDrag) {
+                if (algoDrag.ghost) algoDrag.ghost.remove();
+                if (algoDrag.hover) algoDrag.hover.classList.remove('drop-hover');
+                algoDrag.sourceEl.style.opacity = '';
+            }
+        }
+
+        function onAlgoDragEnd(e) {
+            const d = algoDrag;
+            if (!d) return;
+            cleanupAlgoDrag();
+            algoDrag = null;
+
+            if (!d.moved) {
+                handleAlgoTap(d.item);
+                return;
+            }
+            applyAlgoDrop(d.item, getAlgoDropTarget(e.clientX, e.clientY));
+        }
+
+        function onAlgoDragCancel() {
+            cleanupAlgoDrag();
+            algoDrag = null;
+        }
+
+        function applyAlgoDrop(item, target) {
+            const fromLine = item.fromLine;
+            if (fromLine === undefined && !target) return; // soltou um bloco da paleta fora: nada muda
+
+            // Retira o bloco da linha de origem (se veio do algoritmo)
+            if (fromLine !== undefined) {
+                const src = algoProgram[fromLine];
+                if (item.kind === 'vehicle') src.vehicle = null;
+                else src.moves.splice(item.fromIdx, 1);
+            }
+
+            // Coloca na linha de destino (ou cria uma linha nova)
+            if (target) {
+                let lineIdx;
+                if (target.dataset.drop === 'newline') {
+                    algoProgram.push({ vehicle: null, moves: [] });
+                    lineIdx = algoProgram.length - 1;
+                } else {
+                    lineIdx = Number(target.dataset.line);
+                }
+                const line = algoProgram[lineIdx];
+                if (item.kind === 'vehicle') line.vehicle = item.value;
+                else line.moves.push(item.value);
+                algoSelectedLine = lineIdx;
+            }
+
+            onAlgoProgramEdited();
+        }
+
+        // Toque rápido: bloco da paleta vai para a linha selecionada; bloco do algoritmo é removido
+        function handleAlgoTap(item) {
+            if (item.fromLine !== undefined) {
+                applyAlgoDrop(item, null);
+                return;
+            }
+
+            if (!algoProgram[algoSelectedLine]) algoSelectedLine = algoProgram.length - 1;
+            let line = algoProgram[algoSelectedLine];
+
+            if (item.kind === 'vehicle') {
+                // Se a linha já está completa, um novo veículo começa um novo passo
+                if (line.vehicle && line.moves.length) {
+                    algoProgram.splice(algoSelectedLine + 1, 0, { vehicle: null, moves: [] });
+                    algoSelectedLine++;
+                    line = algoProgram[algoSelectedLine];
+                }
+                line.vehicle = item.value;
+            } else {
+                line.moves.push(item.value);
+            }
+            onAlgoProgramEdited();
+        }
+
+        /* ---------- Execução do algoritmo ---------- */
+
+        function findAlgoBlocker(v, nx, ny) {
+            const newCells = [];
+            for (let k = 0; k < v.length; k++) {
+                newCells.push(v.isVertical ? `${nx},${ny + k}` : `${nx + k},${ny}`);
+            }
+            for (const other of algoVehicles) {
+                if (other === v) continue;
+                for (let k = 0; k < other.length; k++) {
+                    const cell = other.isVertical ? `${other.x},${other.y + k}` : `${other.x + k},${other.y}`;
+                    if (newCells.includes(cell)) return other;
+                }
+            }
+            return null;
+        }
+
+        function algoFail(i, v, msg, blocker) {
+            algoStatus[i] = 'error';
+            algoFinished = true;
+            algoRunning = false;
+            renderAlgoProgram();
+            if (v) {
+                const el = algoVehicleEl(v.label);
+                if (el) { el.classList.remove('active'); el.classList.add('crash'); }
+            }
+            if (blocker) {
+                const bel = algoVehicleEl(blocker.label);
+                if (bel) bel.classList.add('crash');
+            }
+            playSound('locked');
+            setAlgoFeedback('error', `❌ ${msg} Corrija o algoritmo e toque em "Voltar ao início".`);
+            updateAlgoControls();
+            return 'error';
+        }
+
+        // Executa a linha i. Retorna 'ok', 'win', 'error' ou 'aborted'.
+        async function executeAlgoLine(i, runId) {
+            const line = algoProgram[i];
+            const stepName = `Passo ${i + 1}`;
+            algoStatus[i] = 'current';
+            renderAlgoProgram();
+
+            if (!line.vehicle) return algoFail(i, null, `${stepName}: falta escolher qual veículo vai andar.`);
+            const v = algoVehicles.find(x => x.label === line.vehicle);
+            if (!v) return algoFail(i, null, `${stepName}: o veículo ${line.vehicle} não existe nesta fase.`);
+            if (!line.moves.length) return algoFail(i, v, `${stepName}: diga para onde o ${vehicleName(v)} deve andar (arraste setas).`);
+
+            const el = algoVehicleEl(v.label);
+            el.classList.add('active');
+
+            for (let k = 0; k < line.moves.length; k++) {
+                const d = ALGO_DIRS[line.moves[k]];
+                const where = `${stepName}, seta ${k + 1} (${d.sym})`;
+
+                if (v.isVertical && d.dx !== 0) {
+                    return algoFail(i, v, `${where}: o ${vehicleName(v)} está na vertical, então só anda ↑ ou ↓.`);
+                }
+                if (!v.isVertical && d.dy !== 0) {
+                    return algoFail(i, v, `${where}: o ${vehicleName(v)} está na horizontal, então só anda ← ou →.`);
+                }
+
+                const nx = v.x + d.dx;
+                const ny = v.y + d.dy;
+                const w = v.isVertical ? 1 : v.length;
+                const h = v.isVertical ? v.length : 1;
+
+                if (nx < 0 || ny < 0 || nx + w > boardSize || ny + h > boardSize) {
+                    return algoFail(i, v, `${where}: o ${vehicleName(v)} vai bater na parede do estacionamento.`);
+                }
+
+                const blocker = findAlgoBlocker(v, nx, ny);
+                if (blocker) {
+                    return algoFail(i, v, `${where}: o ${vehicleName(v)} vai bater no ${vehicleName(blocker)}.`, blocker);
+                }
+
+                v.x = nx;
+                v.y = ny;
+                algoCells++;
+                updateVehicleDOMPosition(el, v);
+                playSound('move');
+                updateAlgoStats();
+
+                await sleep(ALGO_STEP_MS);
+                if (runId !== algoRunId) return 'aborted';
+
+                if (v.type === 0 && v.x + v.length >= boardSize) {
+                    el.classList.remove('active');
+                    algoStatus[i] = 'done';
+                    algoPc = i + 1;
+                    renderAlgoProgram();
+                    updateAlgoStats();
+                    return 'win';
+                }
+            }
+
+            el.classList.remove('active');
+            algoStatus[i] = 'done';
+            algoPc = i + 1;
+            renderAlgoProgram();
+            updateAlgoStats();
+            return 'ok';
+        }
+
+        async function onAlgoWin() {
+            algoFinished = true;
+            algoRunning = false;
+            updateAlgoControls();
+
+            const steps = algoPc;
+            const xEl = algoVehicleEl('X');
+            if (xEl) {
+                xEl.style.left = '108%';
+                xEl.style.opacity = '0';
+            }
+
+            let msg = `🎉 O algoritmo funcionou! O Carro X saiu em ${steps} passo(s), andando ${algoCells} casa(s) no total.`;
+            if (steps < algoProgram.length) {
+                msg += ` (Os ${algoProgram.length - steps} passo(s) restantes nem precisaram ser executados.)`;
+            }
+            setAlgoFeedback('success', msg);
+
+            const runId = algoRunId;
+            await sleep(600);
+            if (runId !== algoRunId) return;
+            showVictory(steps, `${steps} ${steps === 1 ? 'Passo' : 'Passos'} • ${algoCells} casas`);
+        }
+
+        async function algoStepOnce() {
+            if (algoRunning) return;
+            if (algoFinished) {
+                setAlgoFeedback('info', '↩️ A execução terminou. Toque em "Voltar ao início" para rodar de novo.');
+                return;
+            }
+            if (algoPc >= algoProgram.length) {
+                setAlgoFeedback('warn', '🤔 Todos os passos já foram executados e o Carro X ainda não saiu. Acrescente passos ou volte ao início.');
+                return;
+            }
+
+            algoRunning = true;
+            updateAlgoControls();
+            const runId = algoRunId;
+            const result = await executeAlgoLine(algoPc, runId);
+            if (result === 'aborted' || runId !== algoRunId) return;
+
+            algoRunning = false;
+            updateAlgoControls();
+
+            if (result === 'win') {
+                onAlgoWin();
+            } else if (result === 'ok') {
+                if (algoPc >= algoProgram.length) {
+                    setAlgoFeedback('warn', '🤔 Fim do algoritmo, mas o Carro X ainda não chegou à saída. Acrescente mais passos!');
+                } else {
+                    setAlgoFeedback('info', `✅ Passo ${algoPc} executado. Próximo: passo ${algoPc + 1}.`);
+                }
+            }
+        }
+
+        async function algoRunAll() {
+            if (algoRunning) {
+                algoStopRequested = true; // pausa ao final do passo atual
+                return;
+            }
+
+            if (algoFinished || algoPc >= algoProgram.length) {
+                resetAlgoExecution();
+                await sleep(250);
+            }
+
+            algoRunning = true;
+            algoStopRequested = false;
+            updateAlgoControls();
+            const runId = algoRunId;
+            setAlgoFeedback('info', '▶️ Executando o algoritmo...');
+
+            while (algoPc < algoProgram.length) {
+                const result = await executeAlgoLine(algoPc, runId);
+                if (result === 'aborted' || runId !== algoRunId) return;
+                if (result === 'error') return;
+                if (result === 'win') { onAlgoWin(); return; }
+
+                if (algoStopRequested) {
+                    algoRunning = false;
+                    algoStopRequested = false;
+                    updateAlgoControls();
+                    setAlgoFeedback('info', `⏸️ Pausado depois do passo ${algoPc}. Use "Próximo passo" ou "Executar tudo" para continuar.`);
+                    return;
+                }
+
+                await sleep(ALGO_LINE_GAP_MS);
+                if (runId !== algoRunId) return;
+            }
+
+            algoRunning = false;
+            updateAlgoControls();
+            setAlgoFeedback('warn', '🤔 O algoritmo terminou, mas o Carro X ainda não chegou à saída. Acrescente mais passos!');
+        }
+
+        function switchAlgoToFree() {
+            setGameMode('free');
+            abortAlgoRun();
+            if (isCustomLevelMode && customLevelData) {
+                loadCustomLevelFromUrl(customLevelData);
+            } else {
+                startGame(currentLevel);
+            }
+        }
+
+        function goToMenu() {
+            abortAlgoRun();
             isCustomLevelMode = false;
             customLevelData = null;
             customLevelSolution = null;
             document.getElementById('custom-level-banner').classList.add('hidden');
             screenGame.classList.remove('flex');
             screenGame.classList.add('hidden');
+            screenAlgo.classList.add('hidden');
             screenMenu.classList.remove('hidden');
             renderMenu();
+        }
+
+
+        /* EVENTOS DOS BOTÕES E NAVEGAÇÃO */
+        document.getElementById('btn-sound-toggle').onclick = () => {
+            soundEnabled = !soundEnabled;
+            document.getElementById('btn-sound-toggle').innerText = soundEnabled ? '🔊' : '🔇';
+        };
+
+        document.getElementById('btn-back-menu').onclick = goToMenu;
+
+        // Modo de jogo
+        document.getElementById('btn-mode-free').onclick = () => setGameMode('free');
+        document.getElementById('btn-mode-algo').onclick = () => setGameMode('algo');
+        document.getElementById('btn-to-algo').onclick = () => {
+            setGameMode('algo');
+            startAlgoMode();
+        };
+
+        // Controles do Modo Algoritmo
+        document.getElementById('btn-algo-menu').onclick = goToMenu;
+        document.getElementById('btn-algo-to-free').onclick = switchAlgoToFree;
+        document.getElementById('btn-algo-reset').onclick = resetAlgoExecution;
+        document.getElementById('btn-algo-step').onclick = algoStepOnce;
+        document.getElementById('btn-algo-run').onclick = algoRunAll;
+        document.getElementById('btn-algo-clear').onclick = () => {
+            algoProgram.splice(0, algoProgram.length, { vehicle: null, moves: [] });
+            algoSelectedLine = 0;
+            resetAlgoExecution();
+        };
+        document.getElementById('algo-newline').onclick = () => {
+            if (algoRunning) return;
+            algoProgram.push({ vehicle: null, moves: [] });
+            algoSelectedLine = algoProgram.length - 1;
+            onAlgoProgramEdited();
         };
 
         document.getElementById('btn-open-editor').onclick = switchToEditor;
@@ -1822,20 +2791,17 @@
         document.getElementById('btn-next-level').onclick = () => {
             modalWin.classList.remove('active');
             if (currentLevel < levelsData.length - 1) {
-                startGame(currentLevel + 1);
+                startLevel(currentLevel + 1);
             }
+        };
+
+        document.getElementById('btn-win-stay').onclick = () => {
+            modalWin.classList.remove('active');
         };
 
         document.getElementById('btn-win-menu').onclick = () => {
             modalWin.classList.remove('active');
-            isCustomLevelMode = false;
-            customLevelData = null;
-            customLevelSolution = null;
-            document.getElementById('custom-level-banner').classList.add('hidden');
-            screenGame.classList.remove('flex');
-            screenGame.classList.add('hidden');
-            screenMenu.classList.remove('hidden');
-            renderMenu();
+            goToMenu();
         };
 
         document.getElementById('btn-close-locked').onclick = () => {
