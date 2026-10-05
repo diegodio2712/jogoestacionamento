@@ -269,61 +269,20 @@
         /* ============================================================
            MODO ALGORITMO
            ============================================================ */
-        .algo-chip {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 2.5rem;
-            height: 2.5rem;
-            padding: 0 .55rem;
-            border-radius: .75rem;
-            font-family: 'Fredoka', sans-serif;
-            font-weight: 700;
-            font-size: 1.05rem;
-            color: white;
-            cursor: grab;
-            touch-action: none;
-            text-shadow: 1px 1px 2px rgba(0,0,0,.6);
-            box-shadow: inset 0 2px 3px rgba(255,255,255,.35), inset 0 -3px 3px rgba(0,0,0,.3), 0 2px 4px rgba(0,0,0,.25);
-            box-sizing: border-box;
-            transition: transform .1s;
-        }
-        .algo-chip:hover { transform: translateY(-1px); }
-        .algo-chip:active { cursor: grabbing; }
-        .algo-chip.t0 { background: linear-gradient(135deg,#f56565,#e53e3e); border: 2px solid #9b2c2c; }
-        .algo-chip.t1 { background: linear-gradient(135deg,#ecc94b,#d69e2e); border: 2px solid #744210; }
-        .algo-chip.t2 { background: linear-gradient(135deg,#4299e1,#3182ce); border: 2px solid #1a365d; }
-        .algo-chip.arrow { background: linear-gradient(135deg,#475569,#1e293b); border: 2px solid #0f172a; font-size: 1.35rem; }
-        .algo-chip-hint { font-size: .65rem; margin-left: 3px; opacity: .9; }
-        .algo-line .algo-chip { min-width: 2.2rem; height: 2.2rem; font-size: .95rem; }
-        .algo-line .algo-chip.arrow { font-size: 1.15rem; }
-
-        .algo-ghost {
-            position: fixed;
-            pointer-events: none;
-            z-index: 300;
-            transform: translate(-50%, -50%) scale(1.15) rotate(-4deg);
-            opacity: .92;
-            box-shadow: 0 10px 20px rgba(0,0,0,.35);
-        }
-
         .algo-line {
             display: flex;
+            flex-wrap: wrap;
             align-items: center;
-            gap: .5rem;
-            padding: .45rem .5rem;
-            border: 2px dashed #cbd5e1;
+            gap: .45rem;
+            padding: .55rem .6rem;
+            border: 2px solid #e2e8f0;
             border-radius: 1rem;
             background: white;
-            min-height: 3.5rem;
-            transition: background .15s, border-color .15s, transform .15s;
-            cursor: pointer;
+            transition: background .15s, border-color .15s;
         }
-        .algo-line.selected { border-style: solid; border-color: #f59e0b; box-shadow: 0 0 0 2px #fde68a; }
-        .algo-line.current { border-style: solid; border-color: #0ea5e9; background: #e0f2fe; box-shadow: 0 0 0 3px #bae6fd; }
-        .algo-line.done { border-style: solid; border-color: #10b981; background: #ecfdf5; }
-        .algo-line.error { border-style: solid; border-color: #ef4444; background: #fef2f2; animation: algo-shake .4s; }
-        .algo-line.drop-hover, .algo-newline.drop-hover { background: #fef3c7; border-color: #f59e0b; transform: scale(1.015); }
+        .algo-line.current { border-color: #0ea5e9; background: #e0f2fe; box-shadow: 0 0 0 3px #bae6fd; }
+        .algo-line.done { border-color: #10b981; background: #ecfdf5; }
+        .algo-line.error { border-color: #ef4444; background: #fef2f2; animation: algo-shake .4s; }
 
         .algo-line-num {
             flex: none;
@@ -342,32 +301,35 @@
         .algo-line.current .algo-line-num { background: #0ea5e9; color: white; }
         .algo-line.error .algo-line-num { background: #ef4444; color: white; }
 
-        .algo-slot-vehicle {
-            flex: none;
-            width: 2.9rem;
-            height: 2.9rem;
-            border: 2px dashed #cbd5e1;
-            border-radius: .8rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #94a3b8;
-            font-size: .6rem;
-            font-weight: 800;
-            text-align: center;
-            line-height: 1.1;
+        .algo-word { font-size: .78rem; font-weight: 800; color: #64748b; }
+
+        .algo-select {
+            appearance: none;
+            -webkit-appearance: none;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 600;
+            font-size: .9rem;
+            color: #1e293b;
+            background-color: #f8fafc;
+            background-image: linear-gradient(45deg, transparent 50%, #64748b 50%), linear-gradient(135deg, #64748b 50%, transparent 50%);
+            background-position: calc(100% - 13px) 55%, calc(100% - 8px) 55%;
+            background-size: 5px 5px, 5px 5px;
+            background-repeat: no-repeat;
+            border: 2px solid #cbd5e1;
+            border-radius: .7rem;
+            padding: .35rem 1.6rem .35rem .6rem;
+            cursor: pointer;
+            min-height: 2.4rem;
         }
-        .algo-slot-vehicle.filled { border-color: transparent; }
-        .algo-slot-moves {
-            flex: 1;
-            display: flex;
-            flex-wrap: wrap;
-            gap: .3rem;
-            align-items: center;
-            min-height: 2.5rem;
-        }
-        .algo-placeholder { font-size: .7rem; color: #94a3b8; font-weight: 700; }
+        .algo-select:focus { outline: none; border-color: #f59e0b; box-shadow: 0 0 0 3px #fde68a; }
+        .algo-select.empty { color: #94a3b8; border-style: dashed; }
+        .algo-select:disabled { cursor: not-allowed; opacity: .75; }
+        .algo-select.v-t0:not(.empty) { border-color: #e53e3e; background-color: #fff5f5; }
+        .algo-select.v-t1:not(.empty) { border-color: #d69e2e; background-color: #fffbeb; }
+        .algo-select.v-t2:not(.empty) { border-color: #3182ce; background-color: #ebf8ff; }
+
         .algo-line-del {
+            margin-left: auto;
             flex: none;
             font-size: .8rem;
             padding: .3rem .4rem;
@@ -375,19 +337,7 @@
             opacity: .55;
         }
         .algo-line-del:hover { opacity: 1; background: #fee2e2; }
-
-        .algo-newline {
-            border: 2px dashed #94a3b8;
-            border-radius: 1rem;
-            padding: .75rem;
-            text-align: center;
-            font-size: .8rem;
-            font-weight: 800;
-            color: #64748b;
-            cursor: pointer;
-            transition: background .15s, border-color .15s, transform .15s;
-        }
-        .algo-newline:hover { background: #f8fafc; }
+        .algo-line-del:disabled { opacity: .2; cursor: not-allowed; }
 
         .algo-vehicle { cursor: default; transition: left .24s ease, top .24s ease, opacity .5s, box-shadow .2s, filter .2s; }
         .algo-vehicle:active { cursor: default; filter: none; }
@@ -674,35 +624,21 @@
                 <div id="algo-feedback" class="w-full max-w-[440px] mx-auto mt-3 p-3 rounded-xl text-xs font-bold border"></div>
             </div>
 
-            <!-- Coluna dos blocos e do algoritmo -->
-            <div class="space-y-4">
-                <div class="bg-white/95 border border-slate-200 rounded-2xl p-4 shadow-md">
-                    <h3 class="text-xs font-black uppercase tracking-wider text-slate-500 mb-1">🧱 Blocos</h3>
-                    <p class="text-[11px] text-slate-400 font-semibold mb-3">
-                        Arraste para uma linha do algoritmo — ou toque para adicionar na linha selecionada.
-                    </p>
-                    <div class="text-[11px] font-bold text-slate-400 mb-1">Veículos</div>
-                    <div id="algo-palette-vehicles" class="flex flex-wrap gap-1.5 mb-3"></div>
-                    <div class="text-[11px] font-bold text-slate-400 mb-1">Direções</div>
-                    <div id="algo-palette-moves" class="flex flex-wrap gap-1.5"></div>
+            <!-- Coluna do algoritmo -->
+            <div class="bg-white/95 border border-slate-200 rounded-2xl p-4 shadow-md">
+                <div class="flex justify-between items-center mb-1">
+                    <h3 class="text-xs font-black uppercase tracking-wider text-slate-500">📜 Algoritmo</h3>
+                    <button id="btn-algo-clear" class="text-[11px] font-bold text-red-500 hover:bg-red-50 px-2 py-1 rounded-lg border border-red-200 transition">
+                        🗑️ Limpar
+                    </button>
                 </div>
-
-                <div class="bg-white/95 border border-slate-200 rounded-2xl p-4 shadow-md">
-                    <div class="flex justify-between items-center mb-3">
-                        <h3 class="text-xs font-black uppercase tracking-wider text-slate-500">📜 Algoritmo</h3>
-                        <button id="btn-algo-clear" class="text-[11px] font-bold text-red-500 hover:bg-red-50 px-2 py-1 rounded-lg border border-red-200 transition">
-                            🗑️ Limpar
-                        </button>
-                    </div>
-                    <div id="algo-program" class="space-y-2"></div>
-                    <div id="algo-newline" data-drop="newline" class="algo-newline mt-2">
-                        ➕ Novo passo
-                        <span class="block text-[10px] font-semibold text-slate-400 mt-0.5">arraste um bloco aqui ou toque</span>
-                    </div>
-                    <p class="text-[10px] text-slate-400 font-semibold mt-2 text-center">
-                        Toque em um bloco dentro do algoritmo para removê-lo (ou arraste-o para fora).
-                    </p>
-                </div>
+                <p class="text-[11px] text-slate-400 font-semibold mb-3">
+                    Em cada passo, escolha o veículo, quantas casas ele anda e em qual sentido.
+                </p>
+                <div id="algo-program" class="space-y-2"></div>
+                <button id="btn-algo-add" class="w-full mt-3 border-2 border-dashed border-slate-300 hover:border-amber-400 hover:bg-amber-50 text-slate-500 hover:text-amber-700 font-bold py-2.5 rounded-xl text-sm transition">
+                    ➕ Adicionar passo
+                </button>
             </div>
         </div>
     </main>
@@ -2093,14 +2029,14 @@
 
         let algoInitial = [];      // veículos no estado inicial (com rótulos)
         let algoVehicles = [];     // estado atual durante a execução
-        let algoProgram = [];      // [{ vehicle: 'A', moves: ['R','R'] }, ...]
+        let algoProgram = [];      // [{ vehicle: 'A', count: 2, dir: 'R' }, ...]
+        const newAlgoLine = () => ({ vehicle: null, count: 1, dir: null });
         let algoStatus = [];       // '' | 'current' | 'done' | 'error' para cada passo
         let algoPc = 0;            // índice do próximo passo a executar
         let algoCells = 0;         // casas andadas no total
         let algoRunning = false;
         let algoStopRequested = false;
         let algoFinished = false;  // venceu ou deu erro: é preciso voltar ao início
-        let algoSelectedLine = 0;  // linha que recebe os blocos tocados
         let algoRunId = 0;         // invalida execuções antigas (reset, menu etc.)
         const algoProgramsByLevel = {};
 
@@ -2176,14 +2112,12 @@
             algoInitial = labelVehicles(getCurrentLevelVehicles());
 
             const key = algoLevelKey();
-            if (!algoProgramsByLevel[key]) algoProgramsByLevel[key] = [{ vehicle: null, moves: [] }];
+            if (!algoProgramsByLevel[key]) algoProgramsByLevel[key] = [newAlgoLine()];
             algoProgram = algoProgramsByLevel[key];
-            algoSelectedLine = algoProgram.length - 1;
 
             document.getElementById('algo-level-title').textContent =
                 isCustomLevelMode ? 'Fase Personalizada' : `Nível ${currentLevel + 1}`;
 
-            renderAlgoPalette();
             resetAlgoExecution();
 
             screenMenu.classList.add('hidden');
@@ -2205,7 +2139,7 @@
             renderAlgoProgram();
             updateAlgoStats();
             updateAlgoControls();
-            setAlgoFeedback('info', '💡 Cada linha é um passo: um veículo + as setas de para onde ele anda. Ex.: X → → faz o Carro X andar 2 casas para a direita.');
+            setAlgoFeedback('info', '💡 Cada linha é um passo: escolha o veículo, quantas casas ele anda e o sentido. Ex.: X anda 2 casas para → direita.');
         }
 
         /* ---------- Renderização ---------- */
@@ -2236,97 +2170,101 @@
             return algoBoard.querySelector(`.algo-vehicle[data-label="${label}"]`);
         }
 
-        function sortedPaletteVehicles() {
+        function sortedVehicles() {
             const order = v => v.type === 0 ? 0 : (v.type === 1 ? 1 : 2);
             return [...algoInitial].sort((a, b) =>
                 order(a) - order(b) || a.label.localeCompare(b.label, 'pt-BR', { numeric: true })
             );
         }
 
-        function makeAlgoChip(item) {
-            const el = document.createElement('div');
-            if (item.kind === 'vehicle') {
-                const v = algoInitial.find(x => x.label === item.value);
-                el.className = `algo-chip t${v ? v.type : 1}`;
-                el.textContent = item.value;
-                if (v && item.fromLine === undefined) {
-                    const hint = document.createElement('span');
-                    hint.className = 'algo-chip-hint';
-                    hint.textContent = v.isVertical ? '↕' : '↔';
-                    el.appendChild(hint);
-                    el.title = `${vehicleName(v)} (${v.isVertical ? 'vertical: anda ↑ ↓' : 'horizontal: anda ← →'})`;
-                }
-            } else {
-                el.className = 'algo-chip arrow';
-                el.textContent = ALGO_DIRS[item.value].sym;
+        function makeSelect(options, value, placeholder, onChange) {
+            const sel = document.createElement('select');
+            sel.className = 'algo-select';
+            if (placeholder) {
+                const ph = document.createElement('option');
+                ph.value = '';
+                ph.textContent = placeholder;
+                sel.appendChild(ph);
             }
-            el.addEventListener('pointerdown', e => startAlgoDrag(e, item, el));
-            return el;
+            options.forEach(o => {
+                const opt = document.createElement('option');
+                opt.value = o.value;
+                opt.textContent = o.text;
+                sel.appendChild(opt);
+            });
+            sel.value = value == null ? '' : String(value);
+            sel.classList.toggle('empty', sel.value === '');
+            sel.disabled = algoRunning;
+            sel.onchange = () => onChange(sel.value);
+            return sel;
         }
 
-        function renderAlgoPalette() {
-            const vbox = document.getElementById('algo-palette-vehicles');
-            const mbox = document.getElementById('algo-palette-moves');
-            vbox.innerHTML = '';
-            mbox.innerHTML = '';
-            sortedPaletteVehicles().forEach(v => vbox.appendChild(makeAlgoChip({ kind: 'vehicle', value: v.label })));
-            ['L', 'R', 'U', 'D'].forEach(d => mbox.appendChild(makeAlgoChip({ kind: 'move', value: d })));
+        function makeWord(text) {
+            const w = document.createElement('span');
+            w.className = 'algo-word';
+            w.textContent = text;
+            return w;
         }
+
+        const ALGO_DIR_OPTIONS = [
+            { value: 'R', text: '→ direita' },
+            { value: 'L', text: '← esquerda' },
+            { value: 'U', text: '↑ cima' },
+            { value: 'D', text: '↓ baixo' }
+        ];
+        const ALGO_MAX_CELLS = 5;
 
         function renderAlgoProgram() {
             const list = document.getElementById('algo-program');
             list.innerHTML = '';
 
+            const vehicleOptions = sortedVehicles().map(v => ({
+                value: v.label,
+                text: `${v.label} — ${v.type === 0 ? 'Carro vermelho' : (v.type === 2 ? 'Caminhão' : 'Carro')} ${v.isVertical ? '↕' : '↔'}`
+            }));
+            const countOptions = Array.from({ length: ALGO_MAX_CELLS }, (_, k) => ({ value: k + 1, text: String(k + 1) }));
+
             algoProgram.forEach((line, i) => {
                 const status = algoStatus[i] || '';
                 const row = document.createElement('div');
-                row.className = `algo-line ${status} ${(i === algoSelectedLine && !status) ? 'selected' : ''}`;
-                row.dataset.drop = 'line';
-                row.dataset.line = i;
-                row.onclick = () => {
-                    if (algoRunning) return;
-                    algoSelectedLine = i;
-                    renderAlgoProgram();
-                };
+                row.className = `algo-line ${status}`;
 
                 const num = document.createElement('div');
                 num.className = 'algo-line-num';
                 num.textContent = status === 'done' ? '✓' : (status === 'error' ? '!' : i + 1);
                 row.appendChild(num);
 
-                const vSlot = document.createElement('div');
-                vSlot.className = `algo-slot-vehicle ${line.vehicle ? 'filled' : ''}`;
-                if (line.vehicle) {
-                    vSlot.appendChild(makeAlgoChip({ kind: 'vehicle', value: line.vehicle, fromLine: i }));
-                } else {
-                    vSlot.textContent = 'veículo';
-                }
-                row.appendChild(vSlot);
+                const vSel = makeSelect(vehicleOptions, line.vehicle, 'Veículo', val => {
+                    line.vehicle = val || null;
+                    onAlgoProgramEdited();
+                });
+                const v = algoInitial.find(x => x.label === line.vehicle);
+                if (v) vSel.classList.add(`v-t${v.type}`);
+                row.appendChild(vSel);
 
-                const mSlot = document.createElement('div');
-                mSlot.className = 'algo-slot-moves';
-                if (line.moves.length) {
-                    line.moves.forEach((m, j) => {
-                        mSlot.appendChild(makeAlgoChip({ kind: 'move', value: m, fromLine: i, fromIdx: j }));
-                    });
-                } else {
-                    const ph = document.createElement('span');
-                    ph.className = 'algo-placeholder';
-                    ph.textContent = 'arraste as setas aqui';
-                    mSlot.appendChild(ph);
-                }
-                row.appendChild(mSlot);
+                row.appendChild(makeWord('anda'));
+
+                row.appendChild(makeSelect(countOptions, line.count, null, val => {
+                    line.count = Number(val);
+                    onAlgoProgramEdited();
+                }));
+
+                row.appendChild(makeWord(line.count === 1 ? 'casa para' : 'casas para'));
+
+                row.appendChild(makeSelect(ALGO_DIR_OPTIONS, line.dir, 'Sentido', val => {
+                    line.dir = val || null;
+                    onAlgoProgramEdited();
+                }));
 
                 const del = document.createElement('button');
                 del.className = 'algo-line-del';
                 del.title = 'Apagar este passo';
                 del.textContent = '🗑️';
-                del.onclick = e => {
-                    e.stopPropagation();
+                del.disabled = algoRunning;
+                del.onclick = () => {
                     if (algoRunning) return;
                     algoProgram.splice(i, 1);
-                    if (algoProgram.length === 0) algoProgram.push({ vehicle: null, moves: [] });
-                    algoSelectedLine = Math.min(algoSelectedLine, algoProgram.length - 1);
+                    if (algoProgram.length === 0) algoProgram.push(newAlgoLine());
                     onAlgoProgramEdited();
                 };
                 row.appendChild(del);
@@ -2345,6 +2283,9 @@
             const stepBtn = document.getElementById('btn-algo-step');
             const runBtn = document.getElementById('btn-algo-run');
             stepBtn.disabled = algoRunning;
+            document.getElementById('btn-algo-add').disabled = algoRunning;
+            document.getElementById('btn-algo-clear').disabled = algoRunning;
+            document.querySelectorAll('#algo-program select, #algo-program button').forEach(el => el.disabled = algoRunning);
             if (algoRunning) {
                 runBtn.innerHTML = '<span>⏸️</span>Pausar';
                 runBtn.className = 'algo-ctrl bg-amber-500 hover:bg-amber-600 text-slate-900';
@@ -2376,131 +2317,6 @@
                 renderAlgoProgram();
                 updateAlgoStats();
             }
-        }
-
-        /* ---------- Arrastar e soltar (funciona com mouse e toque) ---------- */
-
-        let algoDrag = null;
-
-        function startAlgoDrag(e, item, sourceEl) {
-            if (algoRunning) return;
-            if (e.button !== undefined && e.button !== 0) return;
-            e.preventDefault();
-            e.stopPropagation();
-            algoDrag = { item, sourceEl, startX: e.clientX, startY: e.clientY, ghost: null, moved: false, hover: null };
-            window.addEventListener('pointermove', onAlgoDragMove);
-            window.addEventListener('pointerup', onAlgoDragEnd);
-            window.addEventListener('pointercancel', onAlgoDragCancel);
-        }
-
-        function getAlgoDropTarget(x, y) {
-            const el = document.elementFromPoint(x, y);
-            return el ? el.closest('[data-drop]') : null;
-        }
-
-        function onAlgoDragMove(e) {
-            const d = algoDrag;
-            if (!d) return;
-            if (!d.moved) {
-                if (Math.hypot(e.clientX - d.startX, e.clientY - d.startY) < 6) return;
-                d.moved = true;
-                d.ghost = d.sourceEl.cloneNode(true);
-                d.ghost.classList.add('algo-ghost');
-                document.body.appendChild(d.ghost);
-                if (d.item.fromLine !== undefined) d.sourceEl.style.opacity = '0.3';
-            }
-            e.preventDefault();
-            d.ghost.style.left = `${e.clientX}px`;
-            d.ghost.style.top = `${e.clientY}px`;
-
-            const target = getAlgoDropTarget(e.clientX, e.clientY);
-            if (target !== d.hover) {
-                if (d.hover) d.hover.classList.remove('drop-hover');
-                if (target) target.classList.add('drop-hover');
-                d.hover = target;
-            }
-        }
-
-        function cleanupAlgoDrag() {
-            window.removeEventListener('pointermove', onAlgoDragMove);
-            window.removeEventListener('pointerup', onAlgoDragEnd);
-            window.removeEventListener('pointercancel', onAlgoDragCancel);
-            if (algoDrag) {
-                if (algoDrag.ghost) algoDrag.ghost.remove();
-                if (algoDrag.hover) algoDrag.hover.classList.remove('drop-hover');
-                algoDrag.sourceEl.style.opacity = '';
-            }
-        }
-
-        function onAlgoDragEnd(e) {
-            const d = algoDrag;
-            if (!d) return;
-            cleanupAlgoDrag();
-            algoDrag = null;
-
-            if (!d.moved) {
-                handleAlgoTap(d.item);
-                return;
-            }
-            applyAlgoDrop(d.item, getAlgoDropTarget(e.clientX, e.clientY));
-        }
-
-        function onAlgoDragCancel() {
-            cleanupAlgoDrag();
-            algoDrag = null;
-        }
-
-        function applyAlgoDrop(item, target) {
-            const fromLine = item.fromLine;
-            if (fromLine === undefined && !target) return; // soltou um bloco da paleta fora: nada muda
-
-            // Retira o bloco da linha de origem (se veio do algoritmo)
-            if (fromLine !== undefined) {
-                const src = algoProgram[fromLine];
-                if (item.kind === 'vehicle') src.vehicle = null;
-                else src.moves.splice(item.fromIdx, 1);
-            }
-
-            // Coloca na linha de destino (ou cria uma linha nova)
-            if (target) {
-                let lineIdx;
-                if (target.dataset.drop === 'newline') {
-                    algoProgram.push({ vehicle: null, moves: [] });
-                    lineIdx = algoProgram.length - 1;
-                } else {
-                    lineIdx = Number(target.dataset.line);
-                }
-                const line = algoProgram[lineIdx];
-                if (item.kind === 'vehicle') line.vehicle = item.value;
-                else line.moves.push(item.value);
-                algoSelectedLine = lineIdx;
-            }
-
-            onAlgoProgramEdited();
-        }
-
-        // Toque rápido: bloco da paleta vai para a linha selecionada; bloco do algoritmo é removido
-        function handleAlgoTap(item) {
-            if (item.fromLine !== undefined) {
-                applyAlgoDrop(item, null);
-                return;
-            }
-
-            if (!algoProgram[algoSelectedLine]) algoSelectedLine = algoProgram.length - 1;
-            let line = algoProgram[algoSelectedLine];
-
-            if (item.kind === 'vehicle') {
-                // Se a linha já está completa, um novo veículo começa um novo passo
-                if (line.vehicle && line.moves.length) {
-                    algoProgram.splice(algoSelectedLine + 1, 0, { vehicle: null, moves: [] });
-                    algoSelectedLine++;
-                    line = algoProgram[algoSelectedLine];
-                }
-                line.vehicle = item.value;
-            } else {
-                line.moves.push(item.value);
-            }
-            onAlgoProgramEdited();
         }
 
         /* ---------- Execução do algoritmo ---------- */
@@ -2549,14 +2365,15 @@
             if (!line.vehicle) return algoFail(i, null, `${stepName}: falta escolher qual veículo vai andar.`);
             const v = algoVehicles.find(x => x.label === line.vehicle);
             if (!v) return algoFail(i, null, `${stepName}: o veículo ${line.vehicle} não existe nesta fase.`);
-            if (!line.moves.length) return algoFail(i, v, `${stepName}: diga para onde o ${vehicleName(v)} deve andar (arraste setas).`);
+            if (!line.dir) return algoFail(i, v, `${stepName}: falta escolher o sentido do ${vehicleName(v)}.`);
+            const moveList = Array(line.count || 1).fill(line.dir);
 
             const el = algoVehicleEl(v.label);
             el.classList.add('active');
 
-            for (let k = 0; k < line.moves.length; k++) {
-                const d = ALGO_DIRS[line.moves[k]];
-                const where = `${stepName}, seta ${k + 1} (${d.sym})`;
+            for (let k = 0; k < moveList.length; k++) {
+                const d = ALGO_DIRS[moveList[k]];
+                const where = `${stepName}, casa ${k + 1} de ${moveList.length} (${d.sym})`;
 
                 if (v.isVertical && d.dx !== 0) {
                     return algoFail(i, v, `${where}: o ${vehicleName(v)} está na vertical, então só anda ↑ ou ↓.`);
@@ -2749,14 +2566,13 @@
         document.getElementById('btn-algo-step').onclick = algoStepOnce;
         document.getElementById('btn-algo-run').onclick = algoRunAll;
         document.getElementById('btn-algo-clear').onclick = () => {
-            algoProgram.splice(0, algoProgram.length, { vehicle: null, moves: [] });
-            algoSelectedLine = 0;
+            if (algoRunning) return;
+            algoProgram.splice(0, algoProgram.length, newAlgoLine());
             resetAlgoExecution();
         };
-        document.getElementById('algo-newline').onclick = () => {
+        document.getElementById('btn-algo-add').onclick = () => {
             if (algoRunning) return;
-            algoProgram.push({ vehicle: null, moves: [] });
-            algoSelectedLine = algoProgram.length - 1;
+            algoProgram.push(newAlgoLine());
             onAlgoProgramEdited();
         };
 
